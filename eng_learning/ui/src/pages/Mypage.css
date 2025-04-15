@@ -1,0 +1,52 @@
+.mypage-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .mypage-card {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 1.5rem;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 15px;
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+  }
+  
+  .mypage-card h2 {
+    font-size: 2rem;
+    color: #4EA685;
+  }
+  
+  .mypage-card h3 {
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .feedback-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .feedback-item {
+    background-color: #f5f5f5;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  
+  .feedback-item h4 {
+    margin: 0;
+    font-weight: bold;
+    color: #4EA685;
+  }
+  
+  .feedback-item p {
+    margin: 10px 0;
+    color: #555;
+  }
+  

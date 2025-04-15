@@ -1,0 +1,105 @@
+/* 텍스트 채팅 화면 스타일 */
+.chat-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f9f9f9;
+  }
+  
+  /* 채팅 박스 스타일 */
+  .chat-box {
+    width: 100%;
+    max-width: 600px;
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 5px 15px;
+    position: relative; /* 종료 버튼을 상대적으로 위치시키기 위한 설정 */
+  }
+  
+  /* 채팅 헤더 스타일 */
+  .chat-header {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* 채팅 메시지 영역 스타일 */
+  .chat-messages {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+  }
+  
+  /* 메시지 스타일 */
+  .message {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    max-width: 80%;
+  }
+  
+  .user-message {
+    background-color: #f0f0f0;
+    align-self: flex-start;
+  }
+  
+  .ai-message {
+    background-color: #4ea685;
+    color: white;
+    align-self: flex-end;
+  }
+  
+  /* 채팅 입력 영역 스타일 */
+  .chat-input-area {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .chat-input {
+    width: 80%;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .send-button {
+    background-color: #4ea685;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .send-button:hover {
+    background-color: #3e8d6f;
+  }
+  
+  /* 종료 버튼 스타일 */
+  .exit-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #f44336; /* 빨간색 */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+  }
+  
+  .exit-button:hover {
+    background-color: #d32f2f; /* hover 시 색상 변경 */
+  }
+  

@@ -1,0 +1,47 @@
+.vocab-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-image: linear-gradient(-45deg, #4EA685, #57B894);
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .vocab-box {
+    width: 90%;
+    max-width: 500px;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 1.5rem;
+    text-align: center;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  }
+  
+  .vocab-box h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #4EA685;
+  }
+  
+  .vocab-list {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .vocab-item {
+    background: #f5f5f5;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .vocab-item h3 {
+    margin: 0;
+    color: #333;
+  }
+  
+  .vocab-item p {
+    margin: 4px 0;
+    color: #555;
+  }
+  

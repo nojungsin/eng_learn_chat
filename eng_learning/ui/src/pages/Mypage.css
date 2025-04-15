@@ -1,0 +1,76 @@
+/* 전체 마이페이지 스타일 */
+.mypage-container {
+    padding: 20px;
+    background-color: #f4f4f4;
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  /* 프로필 헤더 영역 스타일 */
+  .profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .profile-info h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  
+  .profile-info p {
+    color: #777;
+    font-size: 0.875rem;
+  }
+  
+  .login-btn {
+    background-color: #777;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  .login-btn:hover {
+    background-color: #000000;
+  }
+  
+  /* 메뉴 리스트 스타일 */
+  .menu-list {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+  }
+  
+  .menu-item:last-child {
+    border-bottom: none;
+  }
+  
+  .menu-item:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .menu-icon {
+    font-size: 1.5rem;
+    margin-right: 10px;
+  }
+  
+  .menu-text {
+    font-size: 1rem;
+    color: #333;
+  }
+  

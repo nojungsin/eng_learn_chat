@@ -1,0 +1,10 @@
+gemini:
+  api-key: AIzaSyDq8lCVLJVTvdN7GDB032xTWt_w8ajiJio
+
+server:
+  port: 8080
+
+spring:
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true

@@ -1,3 +1,4 @@
+// src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Home from './pages/Home';
@@ -12,24 +13,24 @@ import Voice from './pages/Voice';
 import Text from './pages/Text';
 
 function App() {
-  return (
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/feedback" element={<Feedback />} />
-          <Route path="/vocab" element={<Vocab />} />
-          <Route path="/test" element={<Test />} />
-          <Route path="/mypage" element={<Mypage />} />{/* ✅ /mypage 라우트 설정 */}
-          <Route path="/report" element={<Report />} />
-          <Route path="/choose" element={<Choose />} />
-          <Route path="/voice" element={<Voice />} />
-          <Route path="/text" element={<Text />} />
-        </Routes>
-      </BrowserRouter>
-  );
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Navigate to="/login" />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/feedback" element={<Feedback />} />
+                <Route path="/vocab" element={<Vocab />} />
+                <Route path="/test" element={<Test />} />
+                <Route path="/mypage" element={<Mypage />} />{/* ✅ /mypage 라우트 설정 */}
+                <Route path="/report" element={<Report />} />
+                <Route path="/choose" element={<Choose />} />
+                <Route path="/voice" element={<Voice />} />
+                <Route path="/text" element={<Text />} />
+            </Routes>
+        </BrowserRouter>
+    );
 }
 
 export default App;

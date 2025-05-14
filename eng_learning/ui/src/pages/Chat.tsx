@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import './Home.css';
+import './Home.css';// ✅ CSS 추가
 
 export default function Home() {
   const navigate = useNavigate();

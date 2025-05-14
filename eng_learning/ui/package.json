@@ -14,10 +14,18 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.30.0",
+<<<<<<< HEAD
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
+=======
+    "react-scripts": "^5.0.1",
+    "typescript": "^4.9.5",
+    "web-vitals": "^2.1.4"
+  },
+  "proxy": "http://localhost:8080",
+>>>>>>> 05242bdb880977bded73bd4ec49a188589617046
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",

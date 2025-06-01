@@ -1,71 +1,109 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Text.css';
+import './Chat.css';
 
-type ChatRole = 'user' | 'ai';
-type ChatMessage = {
-  role: ChatRole;
-  text: string;
-};
-
-export default function TextChat() {
-  const navigate = useNavigate();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+export default function Chat() {
+  const [isTopicSelected, setIsTopicSelected] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState('');
+  const [messages, setMessages] = useState<string[]>([]);
   const [input, setInput] = useState('');
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const navigate = useNavigate();
 
-    const userMsg: ChatMessage = {
-      role: 'user',
-      text: input,
-    };
-    setMessages((prev) => [...prev, userMsg]);
-
-    setTimeout(() => {
-      const aiMsg: ChatMessage = {
-        role: 'ai',
-        text: `AI의 응답: "${input}"`,
-      };
-      setMessages((prev) => [...prev, aiMsg]);
-    }, 1000);
-
-    setInput('');
+  const handleTopicSelect = (topic: string) => {
+    setSelectedTopic(topic);
+    setIsTopicSelected(true);
+    setMessages([`You selected: ${topic}`]);
   };
 
-  // 종료 버튼 클릭 시 홈 화면으로 이동
-  const handleEndChat = () => {
-    navigate('/home'); // 홈 화면으로 이동
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    const newMessages = [...messages, `🧑: ${input}`];
+    setMessages(newMessages);
+    setInput('');
+
+    try {
+      const response = await fetch('http://localhost:8080/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: selectedTopic,
+          userMessage: input,
+        }),
+      });
+
+      const data = await response.json();
+      setMessages((prev) => [...prev, `🤖: ${data.reply}`]);
+    } catch (err) {
+      console.error('Error communicating with Gemini API:', err);
+      setMessages((prev) => [...prev, '❌ Gemini 응답 오류가 발생했습니다.']);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleExit = () => {
+    setIsTopicSelected(false);
+    setSelectedTopic('');
+    setMessages([]);
+    setInput('');
+    navigate('/feedback');
   };
 
   return (
-    <div className="chat-container">
-      <div className="chat-box">
-        <div className="chat-header">💬 텍스트 채팅</div>
+      <div className="chat-container">
+        <div className="chat-box">
+          {isTopicSelected && (
+              <button className="exit-button" onClick={handleExit}>
+                ❌
+              </button>
+          )}
 
-        <div className="chat-messages">
-          {messages.map((msg, idx) => (
-            <div key={idx} className={`message ${msg.role}-message`}>
-              <span>{msg.text}</span>
-            </div>
-          ))}
-        </div>
+          <div className="chat-header">
+            {isTopicSelected ? `💬 롤플레이 주제: ${selectedTopic}` : '💬 롤플레이 주제 선택'}
+          </div>
 
-        <div className="chat-input-area">
-          <input
-            className="chat-input"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type here..."
-          />
-          <button className="send-button" onClick={handleSend}>
-            Send
-          </button>
+          {!isTopicSelected && (
+              <div className="topic-selection">
+                <p>어떤 롤플레이를 할까요?</p>
+                <button onClick={() => handleTopicSelect('병원에서 의사와 환자')}>🏥 병원</button>
+                <button onClick={() => handleTopicSelect('레스토랑에서 주문하기')}>🍽️ 레스토랑</button>
+                <button onClick={() => handleTopicSelect('공항에서 체크인하기')}>✈️ 공항</button>
+                <button onClick={() => handleTopicSelect('호텔에서 체크인하기')}>🏨 호텔</button>
+              </div>
+          )}
+
+          {isTopicSelected && (
+              <>
+                <div className="chat-messages">
+                  {messages.map((msg, idx) => (
+                      <div key={idx} className="message">
+                        <span>{msg}</span>
+                      </div>
+                  ))}
+                </div>
+
+                <div className="chat-input-area">
+                  <input
+                      className="chat-input"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Type your message..."
+                  />
+                  <button className="send-button" onClick={handleSend}>
+                    Send
+                  </button>
+                </div>
+              </>
+          )}
         </div>
-        
-        {/* 종료 버튼 */}
-        <button className="exit-button" onClick={handleEndChat}>🚪</button>
       </div>
-    </div>
   );
 }

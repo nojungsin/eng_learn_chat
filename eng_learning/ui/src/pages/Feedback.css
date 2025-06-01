@@ -19,7 +19,7 @@
 
 .feedback-card h2 {
     font-size: 2rem;
-    color: #4EA685;
+    color: #7caaeb;
 }
 
 .feedback-card h3 {
@@ -42,10 +42,54 @@
 .feedback-item h4 {
     margin: 0;
     font-weight: bold;
-    color: #4EA685;
+    color: #7caaeb;
 }
 
 .feedback-item p {
     margin: 10px 0;
     color: #555;
+}
+
+.home-button {
+    background-color: #7caaeb;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    float: right;
+}
+
+.home-button:hover {
+    background-color: #6b8fe4;
+}
+
+.feedback-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+/* 뒤로가기 버튼 */
+.back-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #7caaeb;
+    padding: 0;
+    transition: transform 0.2s;
+}
+
+.back-button:hover {
+    transform: scale(1.2);
+    color: #5d96dc;
+}
+
+/* 기존 홈 버튼 제거해도 무방 */
+.home-button {
+    display: none;
 }

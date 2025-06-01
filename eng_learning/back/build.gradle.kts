@@ -24,6 +24,8 @@ dependencies {
 
     // ✅ 선택: 로깅 (이미 포함되지만 명시적 사용 가능)
     implementation("org.springframework.boot:spring-boot-starter-logging")
+
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
 }
 
 tasks.withType<org.springframework.boot.gradle.tasks.run.BootRun> {

@@ -3,12 +3,12 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-image: linear-gradient(-45deg, #3D9BE9 0%, #3D9BE9 100%);
+  background-image: linear-gradient(-45deg, #ffffff 0%, #ffffff 100%);
   font-family: 'Poppins', sans-serif;
 }
 
 .home-card {
-  background-color: white;
+  background-color: rgb(255, 255, 255);
   padding: 2rem;
   border-radius: 1.5rem;
   text-align: center;
@@ -20,7 +20,7 @@
 .home-card h2 {
   font-size: 2rem;
   margin-bottom: 1rem;
-  color: #3D9BE9;
+  color: #c6d7e6;
 }
 
 .home-card p {
@@ -41,14 +41,14 @@
   font-size: 1rem;
   border: none;
   border-radius: 0.5rem;
-  background-color: #aac3ed;
-  color: white;
+  background-color: #b0d2f8;
+  color: rgb(0, 0, 0);
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
 .home-buttons button:hover {
-  background-color: #3D9BE9;
+  background-color: #7caaeb;
 }
 
 .logout-btn {
@@ -65,29 +65,12 @@
 .logout-btn:hover {
   background-color: #b33b2d;
 }
-.mypage-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 4px 10px;
-  border: none;
-  border-radius: 10px;
-  background-color: #ffffff;
-  color: rgb(0, 0, 0);
-  font-size: 1rem;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.mypage-btn:hover {
-  background-color: #3D9BE9;
-  transform: scale(1.05);
-}
 
 .home-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  position: relative;
 }
 
 .home-content {
@@ -116,5 +99,33 @@
 }
 
 .navbar button:hover {
-  color: #3D9BE9;
+  color: #ffffff;
+}
+
+.mypage-icon-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.mypage-icon-btn:hover {
+  background-color: #d8dee5;
+  transform: scale(1.05);
+}
+
+.icon-user,
+.icon-menu {
+  font-size: 1.2rem;
 }

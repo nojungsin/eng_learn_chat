@@ -7,47 +7,49 @@
   background-color: #f9f9f9;
 }
 
-/* 카드 박스 스타일 */
+/* 카드 박스: chat-box와 동일하게 */
 .choose-card {
   background-color: #ffffff;
-  padding: 30px 20px;
+  padding: 36px 24px;
   border-radius: 10px;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 5px 15px;
   width: 100%;
   max-width: 400px;
+  height: 80vh;                 /* ✅ chat-box와 통일 */
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;      /* ✅ 세로 가운데 정렬 */
+  box-sizing: border-box;
 }
 
-/* 버튼 그룹 래퍼 (정렬 용도) */
+/* 제목과 버튼 그룹 사이 간격 확대 */
+.choose-card h2 {
+  margin: 0 0 24px;            /* 기존보다 여유 */
+  line-height: 1.3;
+}
+
+/* 버튼 그룹 래퍼 (정렬/간격) */
 .choose-buttons {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 15px; /* 버튼 간 간격 */
+  gap: 20px;      /* 버튼 간 간격 */
   margin-top: 20px;
 }
 
-/* 버튼 스타일 */
+/* 버튼 스타일 (중복 제거) */
 .choose-card button {
   background-color: #7caaeb;
   color: white;
   border: none;
   border-radius: 10px;
-  padding: 15px 30px;
-  font-size: 1.1rem;
+  padding: 16px 32px;
+  font-size: 1.12rem;
   cursor: pointer;
   width: 100%;
 }
 
 .choose-card button:hover {
   background-color: #69a1f0;
-}
-.choose-card button {
-  margin-bottom: 15px;
-}
-
-.choose-card button:last-child {
-  margin-bottom: 0;
 }

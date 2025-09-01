@@ -21,7 +21,7 @@
   flex-direction: column;
 }
 
-/* 종료 버튼: voice.css 기준 정리 */
+/* 종료 버튼 */
 .exit-button {
   position: absolute;
   top: 12px;
@@ -82,21 +82,51 @@
   background-color: #6b8fe4;
 }
 
-/* 메시지 스타일 */
+/* 메시지 영역 */
 .chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   flex-grow: 1;
   margin-bottom: 20px;
   overflow-y: auto;
+  padding-right: 4px; /* 스크롤바 여백 */
 }
 
-.message {
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 10px;
-  background-color: #7caaeb;
-  color: white;
+/* 한 줄(행) 컨테이너: 역할에 따라 좌/우 정렬 */
+.message-row {
+  display: flex;
+  width: 100%;
+}
+
+.message-row.ai {
+  justify-content: flex-start; /* 왼쪽 정렬 */
+}
+
+.message-row.user {
+  justify-content: flex-end; /* 오른쪽 정렬 */
+}
+
+/* 말풍선 스타일: 역할별 색상 */
+.message-bubble {
   max-width: 80%;
-  align-self: flex-end;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.message-bubble.ai {
+  background-color: #eef3ff;  /* 연한 블루 */
+  color: #1f2d3d;
+  border-top-left-radius: 6px;  /* 꼬리 느낌 */
+}
+
+.message-bubble.user {
+  background-color: #7caaeb;   /* 기존 메인 블루 */
+  color: #ffffff;
+  border-top-right-radius: 6px; /* 꼬리 느낌 */
 }
 
 /* 입력 영역 */

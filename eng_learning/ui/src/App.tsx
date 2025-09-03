@@ -11,6 +11,8 @@ import Mypage from './pages/Mypage';
 import Choose from './pages/Choose';
 import Voice from './pages/Voice';
 import Text from './pages/Text';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
     return (
@@ -28,6 +30,8 @@ function App() {
                 <Route path="/choose" element={<Choose />} />
                 <Route path="/voice" element={<Voice />} />
                 <Route path="/text" element={<Text />} />
+                <Route path="/forgot" element={<ForgotPassword />} />
+                <Route path="/reset" element={<ResetPassword />} />
             </Routes>
         </BrowserRouter>
     );

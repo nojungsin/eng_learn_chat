@@ -3,45 +3,178 @@
     align-items: center;
     justify-content: center;
     height: 100vh;
-    background-image: linear-gradient(-45deg, #4EA685, #57B894);
+    background-image: linear-gradient(-45deg, #ffffff, #ffffff);
     font-family: 'Poppins', sans-serif;
   }
-  
+
   .vocab-box {
     width: 90%;
     max-width: 500px;
-    background-color: white;
+    background-color: rgb(255, 255, 255);
     padding: 2rem;
     border-radius: 1.5rem;
     text-align: center;
     box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
   }
-  
+
   .vocab-box h2 {
     font-size: 2rem;
     margin-bottom: 1rem;
-    color: #4EA685;
+    color: #7caaeb;
   }
-  
+
   .vocab-list {
     list-style: none;
     padding: 0;
   }
-  
+
   .vocab-item {
-    background: #f5f5f5;
+    background: #e1ebf4;
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 10px;
+    transition: background-color 0.3s;
   }
-  
+
   .vocab-item h3 {
     margin: 0;
     color: #333;
   }
-  
+
   .vocab-item p {
     margin: 4px 0;
     color: #555;
   }
-  
+
+  .vocab-box {
+  width: 90%;
+  max-width: 500px;
+  background-color: rgb(255, 255, 255);
+  padding: 2rem;
+  border-radius: 1.5rem;
+  text-align: center;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh; /* ✅ 박스 전체 높이 제한 */
+}
+
+.vocab-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex-grow: 1;
+  max-height: 100%;
+}
+
+.vocab-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.vocab-list::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 3px;
+}
+
+.vocab-item.known {
+  background: #d3f2dc; /* ✅ 아는 단어는 연두색 배경으로 */
+}
+
+.vocab-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkbox-label {
+  margin-left: 6px;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.vocab-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 10px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #7caaeb;
+  padding: 0;
+  margin-right: 5px;
+  transition: transform 0.2s;
+}
+
+.back-button:hover {
+  transform: scale(1.2);
+  color: #5d96dc;
+}
+
+.vocab-header h2 {
+  font-size: 1.7rem;
+  margin: 0;
+  color: #7caaeb;
+}
+
+.vocab-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.vocab-input {
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+}
+
+.vocab-input:nth-child(3) {
+  grid-column: 1 / span 2; /* 예문은 한 줄 전체 */
+}
+
+.add-btn {
+  grid-column: 1 / span 2;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #7caaeb;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .2s, transform .05s;
+}
+.add-btn:hover { opacity: .9; }
+.add-btn:active { transform: translateY(1px); }
+
+.form-error {
+  margin: 0 0 10px 0;
+  color: #d33;
+  font-size: 0.9rem;
+}
+
+.vocab-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.delete-btn {
+  border: none;
+  background: #f2dede;
+  color: #a94442;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.delete-btn:hover {
+  filter: brightness(.95);
+}

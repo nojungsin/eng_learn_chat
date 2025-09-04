@@ -1,95 +1,111 @@
+/* 컨테이너 */
 .feedback-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #f8f9fa;
-    font-family: 'Poppins', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f8f9fa;
+  font-family: 'Poppins', sans-serif;
 }
 
+/* 카드: home/chat과 동일 스케일 */
 .feedback-card {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 1.5rem;
-    box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 15px;
-    width: 90%;
-    max-width: 600px;
-    text-align: center;
+  background-color: #fff;
+  width: clamp(320px, 80vw, 680px);
+  height: 80vh;
+  padding: clamp(20px, 3vw, 32px) clamp(16px, 2.6vw, 24px);
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 내부 스크롤을 위해 */
+  text-align: left;
 }
 
-.feedback-card h2 {
-    font-size: 2rem;
-    color: #7caaeb;
-}
-
-.feedback-card h3 {
-    font-size: 1.5rem;
-    color: #333;
-}
-
-.feedback-list {
-    list-style: none;
-    padding: 0;
-}
-
-.feedback-item {
-    background-color: #f5f5f5;
-    margin: 10px 0;
-    padding: 15px;
-    border-radius: 8px;
-}
-
-.feedback-item h4 {
-    margin: 0;
-    font-weight: bold;
-    color: #7caaeb;
-}
-
-.feedback-item p {
-    margin: 10px 0;
-    color: #555;
-}
-
-.home-button {
-    background-color: #7caaeb;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 8px 16px;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-bottom: 1rem;
-    float: right;
-}
-
-.home-button:hover {
-    background-color: #6b8fe4;
-}
-
+/* 헤더(뒤로가기 + 제목들) */
 .feedback-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: clamp(10px, 1.6vw, 16px);
 }
 
 /* 뒤로가기 버튼 */
 .back-button {
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #7caaeb;
-    padding: 0;
-    transition: transform 0.2s;
+  background: none;
+  border: none;
+  font-size: clamp(1.3rem, 2.2vw, 1.6rem);
+  cursor: pointer;
+  color: #7caaeb;
+  padding: 0;
+  transition: transform 0.2s, color .2s;
 }
-
 .back-button:hover {
-    transform: scale(1.2);
-    color: #5d96dc;
+  transform: scale(1.12);
+  color: #5d96dc;
 }
 
-/* 기존 홈 버튼 제거해도 무방 */
+/* 제목들 */
+.feedback-card h2 {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  color: #7caaeb;
+  margin: 0;
+}
+.feedback-card h3 {
+  font-size: clamp(1.1rem, 2.2vw, 1.4rem);
+  color: #333;
+  margin: 2px 0 0;
+}
+
+/* 리스트 래퍼: 길어지면 스크롤 */
+.feedback-list {
+  list-style: none;
+  padding: 0;
+  margin: clamp(10px, 1.6vw, 16px) 0 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-right: 4px; /* 스크롤 여백 */
+  scroll-behavior: smooth;
+}
+
+/* 항목 */
+.feedback-item {
+  background-color: #f5f7fb;
+  margin: clamp(8px, 1.2vw, 12px) 0;
+  padding: clamp(12px, 2.2vw, 16px);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.feedback-item h4 {
+  margin: 0 0 6px;
+  font-weight: 700;
+  color: #5b8fe0;
+  font-size: clamp(1rem, 2.2vw, 1.1rem);
+}
+.feedback-item p {
+  margin: 0;
+  color: #555;
+  font-size: clamp(0.95rem, 2vw, 1rem);
+  line-height: 1.45;
+}
+
+/* 홈 버튼: 필요 시 On/Off */
 .home-button {
-    display: none;
+  display: none; /* 기본 숨김 (상단 back 사용) */
+  background-color: #7caaeb;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-left: auto;
+}
+.home-button:hover { background-color: #6b8fe4; }
+
+/* 초소형 화면 보정 */
+@media (max-width: 480px) {
+  .feedback-card { width: min(96vw, 540px); }
 }

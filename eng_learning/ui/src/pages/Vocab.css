@@ -1,180 +1,126 @@
+/* 컨테이너 */
 .vocab-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-image: linear-gradient(-45deg, #ffffff, #ffffff);
-    font-family: 'Poppins', sans-serif;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-image: linear-gradient(-45deg, #ffffff, #ffffff);
+  font-family: 'Poppins', sans-serif;
+}
 
-  .vocab-box {
-    width: 90%;
-    max-width: 500px;
-    background-color: rgb(255, 255, 255);
-    padding: 2rem;
-    border-radius: 1.5rem;
-    text-align: center;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-  }
-
-  .vocab-box h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: #7caaeb;
-  }
-
-  .vocab-list {
-    list-style: none;
-    padding: 0;
-  }
-
-  .vocab-item {
-    background: #e1ebf4;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    transition: background-color 0.3s;
-  }
-
-  .vocab-item h3 {
-    margin: 0;
-    color: #333;
-  }
-
-  .vocab-item p {
-    margin: 4px 0;
-    color: #555;
-  }
-
-  .vocab-box {
-  width: 90%;
-  max-width: 500px;
-  background-color: rgb(255, 255, 255);
-  padding: 2rem;
-  border-radius: 1.5rem;
-  text-align: center;
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+/* 카드 박스 */
+.vocab-box {
+  width: clamp(320px, 80vw, 680px);
+  height: 80vh;
+  background-color: #fff;
+  padding: clamp(20px, 3vw, 32px) clamp(16px, 2.6vw, 24px);
+  border-radius: 16px;
+  text-align: left;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.35);
 
   display: flex;
   flex-direction: column;
-  max-height: 80vh; /* ✅ 박스 전체 높이 제한 */
+  box-sizing: border-box;
+  overflow: hidden; /* 내부 스크롤용 */
 }
 
+/* 헤더 */
+.vocab-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: clamp(12px, 2vw, 16px);
+}
+.vocab-header h2 {
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  margin: 0;
+  color: #7caaeb;
+}
+
+/* 뒤로가기 버튼 */
+.back-button {
+  background: none;
+  border: none;
+  font-size: clamp(1.3rem, 2.2vw, 1.5rem);
+  cursor: pointer;
+  color: #7caaeb;
+  padding: 0;
+  transition: transform .2s, color .2s;
+}
+.back-button:hover {
+  transform: scale(1.12);
+  color: #5d96dc;
+}
+
+/* 리스트 래퍼: 내용 스크롤 */
 .vocab-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  flex: 1 1 auto;
   overflow-y: auto;
-  flex-grow: 1;
-  max-height: 100%;
+  padding-right: 4px; /* 스크롤 여백 */
+  scroll-behavior: smooth;
 }
 
-.vocab-list::-webkit-scrollbar {
-  width: 6px;
-}
-
+/* 스크롤바 커스텀 */
+.vocab-list::-webkit-scrollbar { width: 6px; }
 .vocab-list::-webkit-scrollbar-thumb {
   background-color: #ccc;
   border-radius: 3px;
 }
 
-.vocab-item.known {
-  background: #d3f2dc; /* ✅ 아는 단어는 연두색 배경으로 */
+/* 아이템 */
+.vocab-item {
+  background: #e9f1fa;
+  padding: clamp(10px, 2.2vw, 14px);
+  border-radius: 10px;
+  margin-bottom: clamp(8px, 1.6vw, 12px);
+  transition: background-color .25s, box-shadow .25s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.vocab-item:hover {
+  background: #e1ebf4;
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
+}
+.vocab-item.known { background: #d3f2dc; }  /* 아는 단어 강조 */
+
+/* 아이템 내용 */
+.vocab-item h3 {
+  margin: 0 0 4px;
+  color: #333;
+  font-size: clamp(1rem, 2.2vw, 1.1rem);
+}
+.vocab-item p {
+  margin: 4px 0 0;
+  color: #555;
+  font-size: clamp(0.95rem, 2vw, 1rem);
+  line-height: 1.45;
 }
 
+/* 상단 행(단어/체크 등) */
 .vocab-top-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 
+/* 체크박스 라벨 */
 .checkbox-label {
   margin-left: 6px;
-  font-size: 0.9rem;
+  font-size: clamp(0.88rem, 1.8vw, 0.95rem);
   color: #333;
 }
 
-.vocab-header {
-  display: flex;
-  align-items: center;
+/* 타이틀(별도 사용 시) */
+.vocab-box h2 {
+  font-size: clamp(1.4rem, 3.2vw, 2rem);
   margin-bottom: 1rem;
-  gap: 10px;
-}
-
-.back-button {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #7caaeb;
-  padding: 0;
-  margin-right: 5px;
-  transition: transform 0.2s;
-}
-
-.back-button:hover {
-  transform: scale(1.2);
-  color: #5d96dc;
-}
-
-.vocab-header h2 {
-  font-size: 1.7rem;
-  margin: 0;
   color: #7caaeb;
 }
 
-.vocab-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.vocab-input {
-  border: 1px solid #e4e7ec;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 0.95rem;
-}
-
-.vocab-input:nth-child(3) {
-  grid-column: 1 / span 2; /* 예문은 한 줄 전체 */
-}
-
-.add-btn {
-  grid-column: 1 / span 2;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  background: #7caaeb;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity .2s, transform .05s;
-}
-.add-btn:hover { opacity: .9; }
-.add-btn:active { transform: translateY(1px); }
-
-.form-error {
-  margin: 0 0 10px 0;
-  color: #d33;
-  font-size: 0.9rem;
-}
-
-.vocab-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.delete-btn {
-  border: none;
-  background: #f2dede;
-  color: #a94442;
-  border-radius: 6px;
-  padding: 6px 10px;
-  cursor: pointer;
-}
-.delete-btn:hover {
-  filter: brightness(.95);
+/* 초소형 화면 보정 */
+@media (max-width: 480px) {
+  .vocab-box { width: min(96vw, 540px); }
 }

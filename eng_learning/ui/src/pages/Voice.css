@@ -1,128 +1,162 @@
-/* 기존 스타일 유지 */
+/* ====== 컨테이너 ====== */
 .voice-chat-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #f9f9f9;
+  font-family: 'Poppins', sans-serif;
 }
 
+/* ====== 카드 ====== */
 .voice-chat-box {
-    width: 100%;
-    max-width: 400px;
-    height: 70vh;
-    background-color: #ffffff;
-    border-radius: 15px;
-    padding: 30px 20px 20px 20px; /* chat.css와 동일하게 top padding 30px으로 증가 */
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 5px 15px;
-    display: flex;
-    flex-direction: column;
-    position: relative; /* 종료 버튼 배치를 위해 필요 */
+  width: clamp(320px, 80vw, 680px);
+  height: 80vh;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 5px 15px rgba(0,0,0,.1);
+  padding: clamp(20px, 3vw, 32px) clamp(16px, 2.6vw, 24px);
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;           /* 내부 스크롤 영역 용도 */
+  position: relative;         /* ✅ 오버레이 기준점 */
 }
 
-.voice-chat-header {
-    font-size: 1.3rem;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 20px;
-    line-height: 1.4;
-    word-break: keep-all;
-    padding: 0 20px;
-}
-
-/* ✅ 종료 버튼 스타일 chat.css에 맞춤 */
+/* 종료 버튼 */
 .exit-button {
-    position: absolute;
-    top: 12px;
-    right: 15px;
-    background-color: transparent;
-    color: #e74c3c;
-    border: none;
-    font-size: 1.3rem;
-    cursor: pointer;
-    z-index: 2;
-    padding: 4px;
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  background: transparent;
+  color: #e74c3c;
+  border: none;
+  font-size: clamp(1.1rem, 1.3vw, 1.3rem);
+  cursor: pointer;
+  z-index: 6;
+  padding: 4px;
+  transition: transform .12s, color .2s;
+}
+.exit-button:hover { color: #c0392b; transform: scale(1.1); }
+
+/* 헤더 */
+.voice-chat-header {
+  font-size: clamp(1.2rem, 2.6vw, 1.5rem);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: clamp(12px, 2vw, 16px);
+  line-height: 1.35;
+  color: #2b3a4a;
+  word-break: keep-all;
 }
 
-.exit-button:hover {
-    color: #c0392b;
-    transform: scale(1.1);
+/* ====== 토픽 선택(시작 전 오버레이) ====== */
+/* 전역 topic-selection과 충돌 방지: 반드시 박스 스코프 */
+.voice-chat-box .topic-selection {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+
+  width: min(640px, calc(100% - 32px)); /* 카드 폭을 넘지 않게 */
+  text-align: center;
+  padding: 0 6px;
 }
 
-/* 메시지, 컨트롤, 버튼 등 나머지 기존 코드 유지 */
+.voice-chat-box .topic-selection p {
+  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
+  margin-bottom: clamp(10px, 2vw, 16px);
+  color: #333;
+}
+
+.voice-chat-box .topic-selection button {
+  display: block;
+  width: 100%;
+  padding: clamp(12px, 3.2vw, 14px);
+  font-size: clamp(1rem, 2.6vw, 1.05rem);
+  background-color: #7caaeb;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  margin: clamp(8px, 1.8vw, 12px) auto;
+  cursor: pointer;
+  transition: background-color .25s, transform .06s ease;
+}
+.voice-chat-box .topic-selection button:hover { background-color: #6b8fe4; }
+
+/* 태블릿 이상에서 2열(원하면 유지, 싫으면 이 블록 삭제) */
+@media (min-width: 768px) {
+  .voice-chat-box .topic-selection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(10px, 1.8vw, 14px);
+    justify-items: stretch;
+    align-items: center;
+  }
+  .voice-chat-box .topic-selection p { grid-column: 1 / -1; }
+  .voice-chat-box .topic-selection button { width: 100%; }
+}
+
+/* ====== 메시지 영역 ====== */
 .voice-chat-messages {
-    flex-grow: 1;
-    margin-bottom: 20px;
-    overflow-y: auto;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-top: 6px;
+
+  background: #fbfcff;
+  border: 1px solid #eef2fb;
+  border-radius: 10px;
 }
 
-.message {
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    background-color: #7caaeb;
-    color: white;
-    max-width: 80%;
-    align-self: flex-end;
+.voice-chat-messages .message {
+  margin: clamp(8px, 1.4vw, 12px);
+  padding: 10px 12px;
+  background: #eef3ff;
+  color: #1f2d3d;
+  border-radius: 10px;
+  font-size: clamp(0.95rem, 1.8vw, 1rem);
+  line-height: 1.42;
+  word-break: break-word;
 }
 
+.voice-chat-messages::-webkit-scrollbar { width: 6px; }
+.voice-chat-messages::-webkit-scrollbar-thumb {
+  background: #cfd7e6; border-radius: 3px;
+}
+
+/* ====== 컨트롤 영역 ====== */
 .voice-chat-controls {
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: clamp(10px, 1.6vw, 14px);
 }
 
 .record-btn {
-    background-color: #7caaeb;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    cursor: pointer;
-    width: 50%;
-    transition: 0.3s;
+  border: none;
+  border-radius: 999px;
+  padding: clamp(12px, 2.8vw, 14px) clamp(18px, 3.4vw, 22px);
+  font-size: clamp(0.98rem, 1.9vw, 1.05rem);
+  cursor: pointer;
+  background: #7caaeb;
+  color: #fff;
+  transition: background-color .25s, transform .06s ease, box-shadow .2s;
+  box-shadow: 0 8px 20px rgba(124,170,235,.25);
 }
+.record-btn:hover { background: #6b8fe4; }
+.record-btn:active { transform: scale(0.99); }
+.record-btn:focus-visible { outline: 2px solid #4e86de; outline-offset: 2px; }
 
-.record-btn:hover {
-    background-color: #6b8fe4;
-}
-
+/* 녹음 중 스타일 */
 .record-btn.active {
-    background-color: #f44336;
+  background: #e74c3c;
+  box-shadow: 0 10px 24px rgba(231,76,60,.35);
 }
 
-.record-btn.active:hover {
-    background-color: #e53935;
-}
-
-/* 주제 선택 스타일도 일관 유지 */
-.topic-selection {
-    text-align: center;
-    margin-bottom: 20px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 2;
-}
-
-.topic-selection p {
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-}
-
-.topic-selection button {
-    background-color: #7caaeb;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    margin: 10px;
-    cursor: pointer;
-    width: 80%;
-}
-
-.topic-selection button:hover {
-    background-color: #6b8fe4;
+/* ====== 초소형 화면 보정 ====== */
+@media (max-width: 480px) {
+  .voice-chat-box { width: min(96vw, 540px); }
 }

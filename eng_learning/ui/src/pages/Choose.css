@@ -7,49 +7,68 @@
   background-color: #f9f9f9;
 }
 
-/* 카드 박스: chat-box와 동일하게 */
+/* 카드 박스: home/chat과 동일 스케일 */
 .choose-card {
   background-color: #ffffff;
-  padding: 36px 24px;
-  border-radius: 10px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 5px 15px;
-  width: 100%;
-  max-width: 400px;
-  height: 80vh;                 /* ✅ chat-box와 통일 */
+  width: clamp(320px, 80vw, 680px);
+  height: 80vh; /* chat-box와 통일 */
+  padding: clamp(24px, 3vw, 36px) clamp(16px, 2.6vw, 24px);
+  border-radius: 16px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;      /* ✅ 세로 가운데 정렬 */
+  justify-content: center; /* 세로 가운데 정렬 */
   box-sizing: border-box;
 }
 
-/* 제목과 버튼 그룹 사이 간격 확대 */
+/* 제목 */
 .choose-card h2 {
-  margin: 0 0 24px;            /* 기존보다 여유 */
-  line-height: 1.3;
+  margin: 0 0 clamp(18px, 2vw, 24px);
+  line-height: 1.25;
+  font-size: clamp(1.35rem, 2.6vw, 1.7rem);
+  text-align: center;
 }
 
-/* 버튼 그룹 래퍼 (정렬/간격) */
+/* 버튼 그룹 */
 .choose-buttons {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;      /* 버튼 간 간격 */
-  margin-top: 20px;
+  gap: clamp(14px, 2vw, 20px);   /* 버튼 간 간격 */
+  margin-top: clamp(14px, 2vw, 20px);
 }
 
-/* 버튼 스타일 (중복 제거) */
+/* 버튼 스타일 */
 .choose-card button {
-  background-color: #7caaeb;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 16px 32px;
-  font-size: 1.12rem;
-  cursor: pointer;
   width: 100%;
+  background-color: #7caaeb;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: clamp(14px, 2.8vw, 16px) clamp(24px, 3.2vw, 32px);
+  font-size: clamp(1rem, 2.4vw, 1.12rem);
+  cursor: pointer;
+  transition: background-color .25s, transform .06s ease;
+}
+.choose-card button:hover { background-color: #69a1f0; }
+.choose-card button:active { transform: scale(0.99); }
+.choose-card button:focus-visible {
+  outline: 2px solid #4e86de;
+  outline-offset: 2px;
 }
 
-.choose-card button:hover {
-  background-color: #69a1f0;
+/* 태블릿 이상에서는 2열 그리드(선택) */
+@media (min-width: 768px) {
+  .choose-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(14px, 1.8vw, 18px);
+  }
+}
+
+/* 초소형 화면 보정 */
+@media (max-width: 480px) {
+  .choose-card { width: min(96vw, 540px); }
 }

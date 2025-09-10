@@ -342,4 +342,14 @@ body {
         margin: .5rem;
         font-size: 2rem;
     }
+    
+    /* 에러 메시지 */
+    .error {
+      color: #DB4437;
+      font-size: 0.85rem;
+      margin: 0.25rem 0 0.75rem;
+      text-align: left;
+      padding-left: 0.25rem;
+    }
+
 }

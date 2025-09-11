@@ -58,11 +58,41 @@ export default function Chat() {
   };
 
   const handleExit = () => {
+    // 세션 피드백 생성 (데모 로직; 실제 평가지표로 교체 가능)
+    const topic = selectedTopic || 'General';
+    const total = messages.length;
+    const userTurns = messages.filter(m => m.role === 'user').length;
+    const aiTurns = messages.filter(m => m.role === 'ai').length;
+
+    const participation = userTurns / Math.max(total, 1);
+    const score = Math.min(100, Math.round(70 + participation * 30)); // 70~100
+
+    const newFeedback = {
+      // 주제별 임시 매핑 (원하면 변경 가능)
+      topic: (topic.includes('병원') && 'Conversation')
+          || (topic.includes('레스토랑') && 'Vocabulary')
+          || (topic.includes('공항') && 'Grammar')
+          || (topic.includes('호텔') && 'Conversation')
+          || 'Conversation',
+      feedback: `세션 요약:
+- 주제: ${topic}
+- 총 메시지: ${total} (사용자 ${userTurns}, AI ${aiTurns})
+- 코멘트: 표현은 자연스러웠습니다. 구체 예문을 더 써보면 좋아요.`,
+      score,
+      level: (score >= 90 ? 'excellent' : score >= 75 ? 'good' : 'needs-work') as
+        'excellent' | 'good' | 'needs-work',
+      date: new Date().toISOString().slice(0, 10),
+      // 필요하면 원문도: rawMessages: messages,
+    };
+
+    // state로 세션 피드백을 싣고 이동
+    navigate('/feedback', { state: { newFeedback } });
+
+    // 로컬 상태 초기화 (선택)
     setIsTopicSelected(false);
     setSelectedTopic('');
     setMessages([]);
     setInput('');
-    navigate('/feedback');
   };
 
   return (

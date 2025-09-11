@@ -57,28 +57,25 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: clamp(320px, 80vw, 680px);
   transform: translate(-50%, -50%);
   z-index: 2;
-  padding: 0 clamp(12px, 2.6vw, 20px);
 }
 
 .topic-selection p {
-  font-size: clamp(1.05rem, 2.2vw, 1.2rem);
-  margin-bottom: clamp(10px, 2vw, 16px);
+  font-size: 1.2rem;
+  margin-bottom: 15px;
 }
 
 .topic-selection button {
-  display: block;
-  width: 100%;                 /* 카드 내부 가로 꽉 채우기 */
-  padding: clamp(12px, 3.2vw, 14px);
-  font-size: clamp(1rem, 2.6vw, 1.05rem);
   background-color: #7caaeb;
-  color: #fff;
+  color: white;
   border: none;
-  border-radius: 12px;
-  margin: clamp(8px, 1.8vw, 12px) auto;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  margin: 10px;
   cursor: pointer;
+  width: 80%;
 }
 
 .topic-selection button:hover {

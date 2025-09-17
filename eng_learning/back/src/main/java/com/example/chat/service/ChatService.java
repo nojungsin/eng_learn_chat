@@ -5,13 +5,12 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.Map;
 
 @Service
 public class ChatService {
 
-    private static final String GEMINI_API_KEY = "AIzaSyC7K3XTSADZWzvk8B7zDwYYRWjvmtmyRmI";  // 실제 키로 대체
+    private static final String GEMINI_API_KEY = "AIzaSyC7K3XTSADZWzvk8B7zDwYYRWjvmtmyRmI";
     private static final String GEMINI_API_URL =
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + GEMINI_API_KEY;
 
@@ -21,32 +20,50 @@ public class ChatService {
         this.webClient = webClientBuilder.baseUrl(GEMINI_API_URL).build();
     }
 
-    public String getGeminiResponse(String prompt) {
+    public Mono<String> generateReply(String topic, String userMessage, String messageHistory) {
+        String prompt = buildPrompt(topic, userMessage, messageHistory);
+
         Map<String, Object> requestBody = Map.of(
-                "contents", List.of(
-                        Map.of("parts", List.of(Map.of("text", prompt)))
-                )
+                "contents", new Object[] {
+                        Map.of("role", "user", "parts", new Object[] { Map.of("text", prompt) })
+                }
         );
 
-        try {
-            // block()으로 동기 처리 (비동기 사용하려면 return Mono<String>)
-            Map<String, Object> response = webClient.post()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(Map.class)
-                    .block(); // 동기 처리
-
-            List candidates = (List) response.get("candidates");
-            Map content = (Map) ((Map) candidates.get(0)).get("content");
-            List parts = (List) content.get("parts");
-            Map firstPart = (Map) parts.get(0);
-
-            return firstPart.get("text").toString();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Gemini 응답 중 오류 발생";
-        }
+        return webClient.post()
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .map(response -> {
+                    var candidates = (java.util.List<Map<String, Object>>) response.get("candidates");
+                    if (candidates != null && !candidates.isEmpty()) {
+                        Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
+                        java.util.List<Map<String, Object>> parts = (java.util.List<Map<String, Object>>) content.get("parts");
+                        if (parts != null && !parts.isEmpty()) {
+                            return (String) parts.get(0).get("text");
+                        }
+                    }
+                    return "❌ No response from Gemini.";
+                });
     }
+
+    private String buildPrompt(String topic, String userMessage, String messageHistory) {
+        return """
+        You are a friendly and encouraging English conversation AI tutor.
+        Always reply only in English...
+        (중략)
+
+        Topic: %s
+
+        Conversation so far:
+        %s
+
+        The last thing the user said was:
+        "%s"
+
+        Reply directly and naturally to this last message. Do not repeat earlier questions.
+        Ask a follow-up based on this specific input.
+        """.formatted(topic, messageHistory == null ? "" : messageHistory, userMessage);
+    }
+
 }

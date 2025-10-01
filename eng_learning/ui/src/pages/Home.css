@@ -1,131 +1,175 @@
-.home-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-image: linear-gradient(-45deg, #ffffff 0%, #ffffff 100%);
-  font-family: 'Poppins', sans-serif;
+:root{
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --brand:#7caaeb;
+  --brand-dark:#5d96dc;
+  --ring:rgba(124,170,235,.45);
+  --shadow:0 12px 40px rgba(16,24,40,.10);
+  --shadow-hover:0 16px 48px rgba(16,24,40,.16);
 }
 
-.home-card {
-  background-color: rgb(255, 255, 255);
-  padding: 2rem;
-  border-radius: 1.5rem;
-  text-align: center;
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-  width: 100%;
-  max-width: 400px;
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0b1020;
+    --card:#12172a;
+    --text:#e5e7eb;
+    --muted:#a1a1aa;
+    --brand:#8fb7ff;
+    --brand-dark:#6a9df5;
+    --ring:rgba(143,183,255,.40);
+  }
 }
 
-.home-card h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  color: #c6d7e6;
+/* 배경: 라디얼+그라데이션 */
+.home-container{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  background:
+    radial-gradient(1100px 500px at 10% -10%, #eaf2ff 0%, transparent 60%),
+    radial-gradient(900px 450px at 110% 0%, #f6e9ff 0%, transparent 55%),
+    linear-gradient(180deg, var(--bg), var(--bg));
+  position:relative;
+  padding:24px;
 }
 
-.home-card p {
-  margin-bottom: 1.5rem;
-  font-weight: 500;
-  color: #444;
+/* 상단 마이페이지 버튼 (글래스 칩) */
+.mypage-icon-btn{
+  position:absolute;
+  top:16px; right:16px;
+  background:linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,.55));
+  backdrop-filter: blur(8px);
+  border:1px solid rgba(125,125,125,.14);
+  border-radius:14px;
+  padding:8px 12px;
+  display:flex; align-items:center; gap:6px;
+  cursor:pointer;
+  box-shadow:0 6px 16px rgba(0,0,0,.08);
+  transition:transform .12s ease, box-shadow .2s ease, background .2s ease;
+  color:var(--text);
+}
+.mypage-icon-btn:hover{ transform:translateY(-1px); box-shadow:0 10px 24px rgba(0,0,0,.12); }
+.mypage-icon-btn:focus-visible{ outline:none; box-shadow:0 0 0 4px var(--ring); }
+.icon-menu{ font-size:1.1rem; line-height:1; }
+
+/* 홈 카드 */
+.home-card{
+  width:100%;
+  max-width: 920px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,255,255,.66)), var(--card);
+  backdrop-filter: blur(10px);
+  border:1px solid rgba(125,125,125,.10);
+  border-radius:20px;
+  box-shadow:var(--shadow);
+  padding:22px;
 }
 
-.home-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 2rem;
+.home-header{
+  text-align:center;
+  margin-bottom:18px;
+}
+.home-header h2{
+  margin:0 0 6px;
+  font-size:1.7rem;
+  color:var(--text);
+  font-weight:800;
+  letter-spacing:.2px;
+}
+.home-header p{
+  margin:0;
+  color:var(--muted);
+  font-weight:500;
 }
 
-.home-buttons button {
-  padding: 0.8rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 0.5rem;
-  background-color: #b0d2f8;
-  color: rgb(0, 0, 0);
-  cursor: pointer;
-  transition: background-color 0.3s;
+/* 액션 그리드 */
+.home-actions{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:14px;
+  margin:14px 0 16px;
 }
 
-.home-buttons button:hover {
-  background-color: #7caaeb;
+@media (max-width: 560px){
+  .home-actions{ grid-template-columns:1fr; }
 }
 
-.logout-btn {
-  padding: 0.6rem 1.5rem;
-  background-color: #DB4437;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
+/* 액션 카드 버튼 */
+.action{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  grid-template-rows:auto auto;
+  column-gap:12px;
+  row-gap:2px;
+  align-items:center;
+  text-align:left;
+
+  padding:16px 16px;
+  border-radius:16px;
+  border:1px solid rgba(125,125,125,.10);
+  background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.86));
+  cursor:pointer;
+
+  transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+  box-shadow:0 8px 20px rgba(16,24,40,.06);
+  color:var(--text);
+}
+.action:hover{
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(125,125,125,.18);
+}
+.action:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 4px var(--ring), var(--shadow);
 }
 
-.logout-btn:hover {
-  background-color: #b33b2d;
+.action-emoji{
+  grid-row: 1 / span 2;
+  font-size:1.35rem;
+  display:grid; place-items:center;
+  width:40px; height:40px;
+  border-radius:12px;
+  background: linear-gradient(180deg, #eef5ff, #eaf2ff);
+  border:1px solid rgba(125,125,125,.10);
 }
 
-.home-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  position: relative;
+.action-title{
+  font-weight:700;
+  font-size:1.05rem;
+}
+.action-sub{
+  color:var(--muted);
+  font-size:.9rem;
 }
 
-.home-content {
-  flex: 1;
-  padding: 20px;
-  text-align: center;
+/* 푸터 */
+.home-footer{
+  display:flex;
+  justify-content:center;
+  padding-top:6px;
 }
 
-.navbar {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background-color: #ffffff;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  padding: 10px;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+.logout-btn{
+  padding:.65rem 1.2rem;
+  background: linear-gradient(180deg, #ff6b6b, #e64949);
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  font-size:.95rem;
+  cursor:pointer;
+  box-shadow:0 8px 18px rgba(230,73,73,.35);
+  transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
 }
-
-.navbar button {
-  background-color: transparent;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
+.logout-btn:hover{
+  transform:translateY(-1px);
+  box-shadow:0 12px 26px rgba(230,73,73,.45);
+  filter: brightness(1.02);
 }
-
-.navbar button:hover {
-  color: #ffffff;
-}
-
-.mypage-icon-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background-color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 6px 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-}
-
-.mypage-icon-btn:hover {
-  background-color: #d8dee5;
-  transform: scale(1.05);
-}
-
-.icon-user,
-.icon-menu {
-  font-size: 1.2rem;
+.logout-btn:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 4px rgba(255,107,107,.35);
 }

@@ -38,8 +38,8 @@
 .feedback-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 1rem;
+  justify-content: space-between; /* 또는 이 줄 없이 아래 margin-left:auto 사용 */
+  margin-bottom: 12px;
 }
 
 .feedback-card h2 {

@@ -89,10 +89,16 @@ export default function Feedback() {
       <div className="feedback-card compact">
         {/* Header */}
         <div className="feedback-header">
-          <button className="back-button" aria-label="뒤로가기" onClick={() => navigate('/home')}>
-            &lt;
-          </button>
           <h2>💬 피드백</h2>
+          {/* ★ 오른쪽 상단 X 버튼 추가 */}
+          <button
+            type="button"
+            className="close-button"
+            aria-label="닫기"
+            onClick={() => navigate(-1)}  // history.back()과 동일한 동작
+           >
+            ×
+          </button>
         </div>
 
         {/* [Step 1] 날짜 선택 화면 */}

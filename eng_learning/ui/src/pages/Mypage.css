@@ -1,76 +1,195 @@
-/* 전체 마이페이지 스타일 */
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --brand: #7caaeb;
+  --brand-dark: #5d96dc;
+  --ring: rgba(124, 170, 235, .45);
+  --shadow: 0 8px 28px rgba(16, 24, 40, .08);
+  --shadow-hover: 0 10px 36px rgba(16, 24, 40, .12);
+}
+
+/* 시스템 다크 모드 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1020;
+    --card: #12172a;
+    --text: #e5e7eb;
+    --muted: #a1a1aa;
+    --brand: #8fb7ff;
+    --brand-dark: #6a9df5;
+    --ring: rgba(143, 183, 255, .4);
+  }
+}
+
+/* 전체 */
 .mypage-container {
-    padding: 20px;
-    background-color: #f4f4f4;
-    font-family: 'Poppins', sans-serif;
-  }
-  
-  /* 프로필 헤더 영역 스타일 */
-  .profile-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-  }
-  
-  .profile-info h2 {
-    font-size: 1.5rem;
-    color: #333;
-    margin-bottom: 5px;
-  }
-  
-  .profile-info p {
-    color: #777;
-    font-size: 0.875rem;
-  }
-  
-  .login-btn {
-    background-color: #777;
-    color: #ffffff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    cursor: pointer;
-  }
-  
-  .login-btn:hover {
-    background-color: #000000;
-  }
-  
-  /* 메뉴 리스트 스타일 */
-  .menu-list {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-  }
-  
-  .menu-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
-    cursor: pointer;
-  }
-  
-  .menu-item:last-child {
-    border-bottom: none;
-  }
-  
-  .menu-item:hover {
-    background-color: #f0f0f0;
-  }
-  
-  .menu-icon {
-    font-size: 1.5rem;
-    margin-right: 10px;
-  }
-  
-  .menu-text {
-    font-size: 1rem;
-    color: #333;
-  }
-  
+  min-height: 100vh;
+  padding: 24px;
+  background: radial-gradient(1200px 600px at 10% -10%, #eaf2ff 0%, transparent 60%),
+              radial-gradient(1000px 500px at 110% 10%, #f6e9ff 0%, transparent 55%),
+              var(--bg);
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  display: grid;
+  place-items: start center;
+}
+
+/* 카드 레이아웃 최대폭 */
+.mypage-container > * {
+  width: 100%;
+  max-width: 920px;
+}
+
+/* 프로필 카드 */
+.profile-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(255,255,255,.8), rgba(255,255,255,.7)), var(--card);
+  backdrop-filter: blur(6px);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(125, 125, 125, .08);
+  margin-bottom: 20px;
+}
+
+.profile-avatar {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #eaf2ff, #f0f9ff);
+  font-size: 1.4rem;
+  border: 1px solid rgba(125, 125, 125, .12);
+}
+
+.profile-info h2 {
+  font-size: 1.35rem;
+  color: var(--text);
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.profile-info p {
+  color: var(--muted);
+  font-size: .9rem;
+  margin: 0;
+}
+
+.login-btn {
+  background: linear-gradient(180deg, var(--brand), var(--brand-dark));
+  color: #fff;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 12px;
+  font-size: .95rem;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(124,170,235,.35);
+  transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
+}
+.login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(124,170,235,.4);
+  filter: brightness(1.02);
+}
+.login-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
+/* 메뉴 카드 리스트 */
+.menu-list {
+  background-color: var(--card);
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(125, 125, 125, .08);
+
+  /* 그리드로 2열 카드 (모바일 1열) */
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* 개별 아이템을 카드로 */
+.menu-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.86));
+  border: 1px solid rgba(125,125,125,.08);
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+}
+.menu-item:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(125,125,125,.14);
+}
+.menu-item:active {
+  transform: translateY(0);
+}
+.menu-item:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px var(--ring), var(--shadow);
+}
+
+/* 모바일에서 1열 */
+@media (max-width: 640px) {
+  .menu-list { grid-template-columns: 1fr; }
+}
+
+/* 아이콘/텍스트 */
+.menu-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+}
+
+.menu-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.menu-text {
+  font-size: 1rem;
+  color: var(--text);
+  font-weight: 600;
+}
+.menu-sub {
+  font-size: .85rem;
+  color: var(--muted);
+}
+
+/* 오른쪽 쉐브론 */
+.menu-chevron {
+  font-size: 1.4rem;
+  color: var(--muted);
+  transform: translateX(0);
+  transition: transform .15s ease, color .2s ease;
+}
+.menu-item:hover .menu-chevron {
+  transform: translateX(2px);
+  color: var(--brand-dark);
+}
+
+/* 기존 테이블형 구분선 제거 (카드라서 불필요) */
+.menu-item + .menu-item {
+  border-top: none;
+}
+
+/* 축소 화면에서 전체 패딩 살짝 압축 */
+@media (max-width: 480px) {
+  .mypage-container { padding: 16px; }
+  .profile-header { padding: 16px; }
+  .menu-list { padding: 12px; gap: 10px; }
+  .menu-item { padding: 12px; }
+}

@@ -95,7 +95,7 @@ export default function Feedback() {
             type="button"
             className="close-button"
             aria-label="닫기"
-            onClick={() => navigate(-1)}  // history.back()과 동일한 동작
+            onClick={() => navigate('/home', { replace: true })}
            >
             ×
           </button>

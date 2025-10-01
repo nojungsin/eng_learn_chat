@@ -219,10 +219,15 @@ export default function Test() {
       <div className="test-card">
         {/* 헤더 */}
         <div className="test-header">
-          <button className="back-button" onClick={() => navigate('/home')} aria-label="뒤로가기">
-            &lt;
-          </button>
           <h2>📝 Test</h2>
+          <button
+            type="button"
+            className="close-button"
+            aria-label="닫기"
+            onClick={() => navigate(-1)}  // history.back()과 동일한 동작
+            >
+             ×
+          </button>
         </div>
 
         {/* 진행 정보 */}

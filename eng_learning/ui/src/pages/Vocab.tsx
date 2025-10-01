@@ -18,6 +18,10 @@ const authHeaders = (): Headers => {
   const h = new Headers();
   const t = localStorage.getItem("token");
   if (t) h.set("Authorization", `Bearer ${t}`);
+
+  const email = localStorage.getItem("email");
+  if (email) h.set("X-Email", email);
+
   return h;
 };
 
@@ -61,7 +65,8 @@ export default function Vocab() {
   useEffect(() => {
     (async () => {
       const token = localStorage.getItem("token");
-      if (!token) {
+      const email = localStorage.getItem("email");   // ★ 추가
+      if (!token || !email) {                        // ★ 추가
         setLoading(false);
         nav("/login");
         return;
@@ -159,10 +164,16 @@ export default function Vocab() {
     <div className="vocab-container">
       <div className="vocab-box">
         <div className="vocab-header">
-          <button className="back-button" onClick={() => nav("/home")}>
-            &lt;
-          </button>
           <h2>📚 단어장</h2>
+          {/* ★ 오른쪽 상단 X 버튼 추가 */}
+          <button
+            type="button"
+            className="close-button"
+            aria-label="닫기"
+            onClick={() => nav(-1)}  // history.back()과 동일한 동작
+          >
+            ×
+          </button>
         </div>
 
         {/* 입력 폼 */}

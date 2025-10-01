@@ -279,3 +279,47 @@
   .feedback-card.compact { max-width: 100%; padding: .9rem 1rem; }
 }
 
+/* === Date Picker === */
+.date-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin: 10px 0 16px;
+}
+
+.date-card {
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform .15s ease, border-color .2s, background .2s;
+  text-align: center;
+  font-weight: 600;
+  color: var(--text);
+}
+.date-card:hover { transform: translateY(-1px); background: #f8fafc; }
+.date-card.active { border-color: var(--primary); background: #eef5ff; color: var(--primary-dark); }
+
+.date-section-title {
+  font-size: 1.05rem;
+  color: var(--text);
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-reset {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--primary-dark);
+  cursor: pointer;
+  font-size: .9rem;
+  text-decoration: underline;
+}
+
+/* compact일 때 살짝 줄이기 */
+.feedback-card.compact .date-card { padding: 8px 10px; border-radius: 10px; }
+.feedback-card.compact .date-section-title { font-size: .95rem; }

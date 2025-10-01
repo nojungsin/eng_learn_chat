@@ -53,10 +53,10 @@
 
 /* 헤더 */
 .test-header{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* 또는 이 줄 없이 아래 margin-left:auto 사용 */
+  margin-bottom: 12px;
 }
 .back-button{
   background: none;

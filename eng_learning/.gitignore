@@ -51,3 +51,6 @@ back/.settings/
 *.ear
 *.db
 *.sqlite
+
+# Ignore local error logs
+push_error.txt

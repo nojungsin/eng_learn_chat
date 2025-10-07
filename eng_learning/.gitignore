@@ -1,0 +1,53 @@
+# === Common ===
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+*.swp
+
+# === IntelliJ / VSCode ===
+.idea/
+.vscode/
+*.iml
+
+# === OS-specific ===
+ehthumbs.db
+Desktop.ini
+
+# === Environment Files ===
+.env
+.env.*
+
+# === Node / React ===
+ui/node_modules/
+ui/.next/
+ui/build/
+ui/dist/
+ui/.cache/
+
+# === Gradle / Java ===
+back/.gradle/
+back/build/
+back/out/
+back/.classpath
+back/.project
+back/.settings/
+
+# === Docker ===
+*.pid
+*.seed
+*.tar
+*.lock
+*.cache
+**/tmp/
+**/logs/
+**/.dockerignore
+
+# === Misc ===
+*.class
+*.jar
+*.war
+*.ear
+*.db
+*.sqlite

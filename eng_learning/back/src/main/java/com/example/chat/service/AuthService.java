@@ -2,53 +2,82 @@ package com.example.chat.service;
 
 import com.example.chat.domain.User;
 import com.example.chat.dto.RegisterRequest;
-import com.example.chat.dto.RegisterResponse;
+import com.example.chat.dto.LoginRequest;
 import com.example.chat.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-/**
- * 회원가입 핵심 로직:
- * 1) 패스워드 일치 확인
- * 2) 아이디 중복 확인
- * 3) Bcrypt로 비밀번호 해시
- * 4) users 테이블에 저장
- */
+import java.util.Optional;
+import java.util.regex.Pattern;
+
 @Service
 public class AuthService {
-    private final UserRepository users;
-    private final PasswordEncoder encoder;
 
-    public AuthService(UserRepository users, PasswordEncoder encoder) {
-        this.users = users;
-        this.encoder = encoder;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+
+    // 이메일 형식 정규식
+    private static final Pattern EMAIL_REGEX =
+            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+
+    public AuthService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    @Transactional
-    public RegisterResponse register(RegisterRequest req) {
-        if (!req.password.equals(req.confirmPassword)) {
-            throw new IllegalArgumentException("Passwords do not match");
-        }
-        if (users.existsByUsername(req.username)) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-        if (users.existsByEmail(req.email)) {
-            throw new IllegalArgumentException("Email already exists");
+    // 회원가입
+    public String register(RegisterRequest req) {
+        if (req.getUsername() == null || req.getUsername().isBlank()
+                || req.getEmail() == null || req.getEmail().isBlank()
+                || req.getPassword() == null || req.getPassword().isBlank()
+                || req.getConfirmPassword() == null || req.getConfirmPassword().isBlank()) {
+            return "모든 필드를 입력해주세요.";
         }
 
-        User u = new User();
-        u.setUsername(req.username);
-        u.setEmail(req.email);
-        u.setPasswordHash(encoder.encode(req.password)); // 해시 저장
+        if (!EMAIL_REGEX.matcher(req.getEmail()).matches()) {
+            return "올바른 이메일 형식이 아닙니다.";
+        }
 
-        users.save(u);
+        if (!req.getPassword().equals(req.getConfirmPassword())) {
+            return "비밀번호가 일치하지 않습니다.";
+        }
 
-        RegisterResponse res = new RegisterResponse();
-        res.id = u.getId();
-        res.username = u.getUsername();
-        res.email = u.getEmail();
-        return res;
+        if (userRepository.existsByUsername(req.getUsername())) {
+            return "이미 존재하는 사용자명입니다.";
+        }
+
+        if (userRepository.existsByEmail(req.getEmail())) {
+            return "이미 사용 중인 이메일입니다.";
+        }
+
+        String hash = encoder.encode(req.getPassword());
+
+        User u = User.builder()
+                .username(req.getUsername())
+                .email(req.getEmail())
+                .passwordHash(hash)
+                .build();
+
+        userRepository.save(u);
+        return null; // 성공
     }
 
+    // 로그인 (email 기반)
+    public String login(LoginRequest req) {
+        if (req.getEmail() == null || req.getEmail().isBlank()
+                || req.getPassword() == null || req.getPassword().isBlank()) {
+            return "이메일과 비밀번호를 입력해주세요.";
+        }
+
+        Optional<User> userOpt = userRepository.findByEmail(req.getEmail());
+        if (userOpt.isEmpty()) {
+            return "존재하지 않는 이메일입니다.";
+        }
+
+        User user = userOpt.get();
+        if (!encoder.matches(req.getPassword(), user.getPasswordHash())) {
+            return "비밀번호가 틀립니다.";
+        }
+
+        return null; // 성공
+    }
 }

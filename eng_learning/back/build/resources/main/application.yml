@@ -1,15 +1,14 @@
-gemini:
-  api-key: AIzaSyC7K3XTSADZWzvk8B7zDwYYRWjvmtmyRmI
-
 server:
   port: 8080
 
 spring:
   application:
     name:gemini-chat
+
   jackson:
     serialization:
       INDENT_OUTPUT: true
+
   datasource:
     url: jdbc:postgresql://localhost:5432/myappdb
     username: appuser

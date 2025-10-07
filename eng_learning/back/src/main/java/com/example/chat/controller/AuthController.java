@@ -1,30 +1,35 @@
+// controller/AuthController.java
 package com.example.chat.controller;
 
-import com.example.chat.dto.RegisterRequest;
-import com.example.chat.dto.RegisterResponse;
+import com.example.chat.dto.*;
 import com.example.chat.service.AuthService;
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * POST /api/auth/register
- * - 요청 바디: RegisterRequest (username/password/confirmPassword/name/nickname)
- * - 응답 바디: RegisterResponse (id/username/name/nickname)
- */
+@CrossOrigin // 프런트 분리 시 CORS 허용
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService auth;
-
-    public AuthController(AuthService auth) {
-        this.auth = auth;
-    }
+    private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest req) {
-        RegisterResponse res = auth.register(req);
-        return ResponseEntity.status(201).body(res);
+    public ResponseEntity<ApiResponse> register(@RequestBody RegisterRequest req) {
+        String err = authService.register(req);
+        if (err == null) {
+            return ResponseEntity.ok(new ApiResponse(true, "회원가입이 완료되었습니다."));
+        }
+        return ResponseEntity.badRequest().body(new ApiResponse(false, err));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest req) {
+        String err = authService.login(req);
+        if (err == null) {
+            return ResponseEntity.ok(new ApiResponse(true, "로그인 성공"));
+        }
+        return ResponseEntity.badRequest().body(new ApiResponse(false, err));
     }
 }

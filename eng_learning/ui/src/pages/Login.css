@@ -352,4 +352,15 @@ body {
       padding-left: 0.25rem;
     }
 
+    .btn{
+        opacity: 1;
+        transition: opacity .2s;
+    }
+
+    .btn:disabled{
+        opacity: .5;
+        color: #757575;
+        cursor: not-allowed;
+    }
+
 }

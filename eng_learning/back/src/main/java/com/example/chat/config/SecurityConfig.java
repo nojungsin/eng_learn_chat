@@ -2,18 +2,22 @@ package com.example.chat.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * 비밀번호 해시를 위한 PasswordEncoder 빈 등록.
- * 스프링 시큐리티 전체 설정을 다 하지 않아도, 이 빈만 있으면
- * 서비스에서 encoder.encode(...)로 해시 가능.
- */
 @Configuration
 public class SecurityConfig {
+
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable()) // ✅ CSRF 비활성화 (React POST 허용)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll() // ✅ 회원가입/로그인 허용
+                        .anyRequest().authenticated()
+                )
+                .formLogin(login -> login.disable())  // ✅ 기본 로그인창 비활성화
+                .httpBasic(basic -> basic.disable()); // ✅ 브라우저 기본 인증창 비활성화
+        return http.build();
     }
 }

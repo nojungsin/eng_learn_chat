@@ -6,7 +6,8 @@ plugins {
 
 group = "com.example"
 version = "1.0.0"
-java.sourceCompatibility = JavaVersion.VERSION_17
+java.sourceCompatibility = JavaVersion.VERSION_17//java version 17까지 rulset 사용.
+//현재 23까지 사용 가능. AWS 서버 맞춰서 바꾸기
 
 repositories {
     mavenCentral()
@@ -33,6 +34,10 @@ dependencies {
 
     // 비밀번호 해시(Bcrypt)
     implementation("org.springframework.boot:spring-boot-starter-security")
+
+    //lombok
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
 
     // PostgreSQL 드라이버
     runtimeOnly("org.postgresql:postgresql:42.7.4")

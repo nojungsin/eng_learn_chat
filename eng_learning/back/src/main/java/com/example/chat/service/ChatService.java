@@ -1,5 +1,6 @@
 package com.example.chat.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.http.MediaType;
@@ -10,7 +11,7 @@ import java.util.Map;
 @Service
 public class ChatService {
 
-    private static final String GEMINI_API_KEY = "AIzaSyC7K3XTSADZWzvk8B7zDwYYRWjvmtmyRmI";
+    private static final String GEMINI_API_KEY = "AIzaSyC7K3XTSADZWzvk8B7zDwYYRWjvmtmyRmI";//api key
     private static final String GEMINI_API_URL =
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + GEMINI_API_KEY;
 

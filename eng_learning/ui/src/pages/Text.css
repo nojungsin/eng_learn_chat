@@ -216,3 +216,60 @@
   .chat-box{ padding:12px; border-radius:16px; }
   .message-bubble{ max-width: 86%; }
 }
+
+/* ── 말풍선 내부 피드백: 패널 제거 버전 ─────────────────── */
+.b-sep{ margin:10px -2px 8px; height:1px; background:rgba(255,255,255,.35); }
+.message-bubble.ai .b-sep{ background:rgba(0,0,0,.12); }
+
+/* 패널 제거: 배경·그림자·외곽선 없음, 텍스트만 */
+.bfb{
+  padding: 0;                 /* 패널 여백 제거 */
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit;             /* 버블 색상 상속 */
+}
+
+/* 헤더 */
+.bfb-head{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.bfb-dot{ width:8px; height:8px; border-radius:999px; display:inline-block; }
+.bfb-label{ font-weight:800; font-size:.82rem; }
+
+/* 본문 */
+.bfb-explain{ font-size:.9rem; line-height:1.4; margin-bottom:6px; }
+.bfb-sg-title{ font-weight:700; font-size:.82rem; opacity:.9; margin-bottom:2px; }
+.bfb-sg-text{ line-height:1.35; }
+
+/* 사용자 버블(파란 배경)에서 읽기 좋은 색 */
+.message-bubble.user .bfb-label{ color: rgba(255,255,255,.95); }
+.message-bubble.user .bfb-explain,
+.message-bubble.user .bfb-sg-title,
+.message-bubble.user .bfb-sg-text{ color: rgba(255,255,255,.86); }
+
+/* AI 버블(밝은 배경) 색 */
+.message-bubble.ai .bfb-label{ color:#334155; }
+.message-bubble.ai .bfb-explain{ color: var(--muted); }
+.message-bubble.ai .bfb-sg-title{ color:#475569; }
+.message-bubble.ai .bfb-sg-text{ color: var(--text); }
+
+/* 레벨 표시: 점 색만 유지(패널 테두리 제거) */
+.bfb-dot.bfb-perfect{ background:#22c55e; }
+.bfb-dot.bfb-neutral{ background:#3b82f6; }
+.bfb-dot.bfb-needs{   background:#ef4444; }
+
+/* 다크 모드에서 말풍선 색 대비 */
+@media (prefers-color-scheme: dark){
+  .b-sep{ background: rgba(255,255,255,.25); }
+  .message-bubble.ai .b-sep{ background: rgba(255,255,255,.08); }
+  .bfb{ background: var(--ai); }
+}
+/* 긴 영어 단어 줄바꿈 안전 */
+.bfb{ overflow-wrap:anywhere; }
+
+/* 모바일 여백 압축 */
+@media (max-width:480px){
+  .bfb{ padding:8px; font-size:.9rem; }
+  .b-sep{ margin:8px -2px 6px; }
+}
+
+/* 혹시 남아있을 구(旧) 피드백 스타일 비활성화 */
+.inline-feedback, .fb2-card{ display:none !important; }

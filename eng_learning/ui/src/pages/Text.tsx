@@ -2,18 +2,67 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Chat.css';
 
+type FbLevel = 'perfect' | 'neutral' | 'needs';
+type Feedback = {
+  level: FbLevel;          // 등급
+  label: string;           // 완벽한 표현 / 무난한 표현 / 개선 필요
+  score: number;           // 0~100
+  explain: string;         // 한국어 설명
+  suggestion: string;      // 한 줄 제안(영문)
+  original: string; // 원문(사용자 입력)
+};
+
 type Message = {
   id: string;
   role: 'ai' | 'user';
   content: string;
-  time: number; // timestamp
+  time: number;
+  feedback?: Feedback;
 };
 
 const fmtTime = (ts: number) => {
   const d = new Date(ts);
-  const hh = String(d.getHours()).padStart(2,'0');
-  const mm = String(d.getMinutes()).padStart(2,'0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
   return `${hh}:${mm}`;
+};
+
+const genFeedback = (text: string): Feedback => {
+  const t = text.trim();
+  const words = t ? t.split(/\s+/).length : 0;
+  const hasPunct = /[.!?]$/.test(t);
+  const hasDupWord = /\b(\w+)\b.*\b\1\b/i.test(t);
+
+  let score = 70;
+  if (words >= 8) score += 15;
+  if (hasPunct) score += 5;
+  if (!hasDupWord) score += 5;
+  score = Math.max(40, Math.min(100, score));
+
+  let level: FbLevel = 'neutral';
+  if (score >= 92) level = 'perfect';
+  else if (score <= 74) level = 'needs';
+
+  const label =
+    level === 'perfect' ? '완벽한 표현' :
+    level === 'neutral' ? '무난한 표현' : '개선 필요';
+
+  let explain = '매우 자연스러운 문장입니다.';
+  let suggestion = t;
+  if (level === 'needs') {
+    explain = '중복·장문·끝맺음 문제로 어색할 수 있어요. 핵심만 간결하게.';
+    suggestion = t
+      .replace(/\bI would go for\b/gi, "I'd choose")
+      .replace(/\s+/g, ' ')
+      .replace(/[^.!?]$/, '$&.');
+  } else if (level === 'neutral') {
+    explain = '자연스럽습니다. 의미를 더 선명하게 다듬어보세요.';
+    suggestion = t
+      .replace(/\bi would like to\b/gi, "I'd like to")
+      .replace(/[^.!?]$/, '$&.');
+  }
+
+  return { level, label, score, explain, suggestion, original: t };
 };
 
 export default function Chat() {
@@ -25,10 +74,7 @@ export default function Chat() {
 
   const endRef = useRef<HTMLDivElement | null>(null);
   const scrollToBottom = () => endRef.current?.scrollIntoView({ behavior: 'smooth' });
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  useEffect(() => { scrollToBottom(); }, [messages]);
 
   const addMessage = (role: 'ai' | 'user', content: string) => {
     setMessages(prev => [...prev, { id: `${Date.now()}-${Math.random()}`, role, content, time: Date.now() }]);
@@ -43,20 +89,25 @@ export default function Chat() {
   const handleSend = () => {
     const text = input.trim();
     if (!text) return;
-    addMessage('user', text);
+
+    const feedback = genFeedback(text);
+    const msg: Message = {
+      id: `${Date.now()}-${Math.random()}`,
+      role: 'user',
+      content: text,
+      time: Date.now(),
+      feedback,
+    };
+    setMessages(prev => [...prev, msg]);
     setInput('');
 
-    // 데모 응답(실제 API 연동 시 대체)
     setTimeout(() => {
       addMessage('ai', `AI: "${text}" 에 대한 응답 예시입니다.`);
     }, 350);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSend();
-    }
+    if (e.key === 'Enter') { e.preventDefault(); handleSend(); }
   };
 
   const handleExit = () => {
@@ -64,9 +115,8 @@ export default function Chat() {
     const total = messages.length;
     const userTurns = messages.filter(m => m.role === 'user').length;
     const aiTurns = messages.filter(m => m.role === 'ai').length;
-
     const participation = userTurns / Math.max(total, 1);
-    const score = Math.min(100, Math.round(70 + participation * 30)); // 70~100
+    const score = Math.min(100, Math.round(70 + participation * 30));
 
     const newFeedback = {
       topic: (topic.includes('병원') && 'Conversation')
@@ -85,8 +135,6 @@ export default function Chat() {
     };
 
     navigate('/feedback', { state: { newFeedback } });
-
-    // 초기화
     setIsTopicSelected(false);
     setSelectedTopic('');
     setMessages([]);
@@ -111,10 +159,8 @@ export default function Chat() {
 
         <div className="chat-header">
           {isTopicSelected ? `💬 롤플레이 주제: ${selectedTopic}` : '💬 롤플레이 주제 선택'}
-          {isTopicSelected && <span className="header-sub">Tip: Enter로 전송</span>}
         </div>
 
-        {/* 토픽 선택 오버레이 */}
         {!isTopicSelected && (
           <div className="topic-selection" role="dialog" aria-modal="true" aria-label="토픽 선택">
             <div className="topic-card">
@@ -136,17 +182,37 @@ export default function Chat() {
           </div>
         )}
 
-        {/* 채팅 영역 */}
         {isTopicSelected && (
           <>
             <div className="chat-messages" role="log" aria-live="polite">
               {messages.map(m => (
                 <div key={m.id} className={`message-row ${m.role}`}>
                   {m.role === 'ai' && <div className="avatar" aria-hidden>🤖</div>}
+
                   <div className={`message-bubble ${m.role}`}>
                     <span>{m.content}</span>
+
+                    {m.role === 'user' && m.feedback && (
+                      <>
+                        <div className="b-sep" /> {/* --- 구분선 --- */}
+                        <div className={`bfb bfb-${m.feedback.level}`}>
+                          <div className="bfb-head">
+                            <span className={`bfb-dot bfb-${m.feedback.level}`} aria-hidden />
+                            <span className="bfb-label">
+                              {m.feedback.label} · {m.feedback.score}/100
+                            </span>
+                          </div>
+                          <div className="bfb-explain">{m.feedback.explain}</div>
+                          <div className="bfb-sg-title">Suggestion</div>
+                          <div className="bfb-sg-text">{m.feedback.suggestion}</div>
+                        </div>
+                      </>
+                    )}
+
                     <div className="meta">{fmtTime(m.time)}</div>
                   </div>
+
+
                   {m.role === 'user' && <div className="avatar" aria-hidden>😊</div>}
                 </div>
               ))}

@@ -6,23 +6,25 @@ import com.example.chat.dto.LoginRequest;
 import com.example.chat.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.example.chat.config.JwtTokenProvider;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider; // ✅ 스프링이 자동으로 주입
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     // 이메일 형식 정규식
     private static final Pattern EMAIL_REGEX =
             Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
-    public AuthService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    // ✅ 생성자 따로 필요 없음 (Lombok이 자동 생성)
 
     // 회원가입
     public String register(RegisterRequest req) {
@@ -78,6 +80,7 @@ public class AuthService {
             return "비밀번호가 틀립니다.";
         }
 
-        return null; // 성공
+        // ✅ JWT 토큰 생성 (0.13.0 문법 기준 JwtTokenProvider)
+        return jwtTokenProvider.createToken(user.getEmail(), "USER");
     }
 }

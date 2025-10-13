@@ -35,6 +35,11 @@ dependencies {
     // 비밀번호 해시(Bcrypt)
     implementation("org.springframework.boot:spring-boot-starter-security")
 
+    //token에 사용하는 jwt
+    implementation("io.jsonwebtoken:jjwt-api:0.13.0")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.13.0") // JSON 파서
+
     //lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

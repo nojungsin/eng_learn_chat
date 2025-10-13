@@ -25,11 +25,9 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest req) {
-        String err = authService.login(req);
-        if (err == null) {
-            return ResponseEntity.ok(new ApiResponse(true, "로그인 성공"));
-        }
-        return ResponseEntity.badRequest().body(new ApiResponse(false, err));
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        String token = authService.login(request); // AuthService에서 JWT 토큰 반환
+        ApiResponse response = new ApiResponse(true, "로그인 성공", token);
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useMemo, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../pages/Login.css';
 
 type AuthResponse = {
@@ -24,6 +24,15 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // ✅ 회원가입 후 이메일 자동 입력
+  useEffect(() => {
+    if (location.state?.email) {
+      setLoginForm((prev) => ({ ...prev, email: location.state.email }));
+      setIsSignIn(true);
+    }
+  }, [location.state]);
 
   // ---------- Input Handlers ----------
   const onChangeLogin = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +86,6 @@ export default function Login() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-
             email: loginForm.email.trim(),
             password: loginForm.password,
           }),
@@ -100,8 +108,8 @@ export default function Login() {
         });
         const data: AuthResponse = await res.json();
         if (!res.ok) throw new Error(data?.message || '회원가입 실패');
-        if (data.token) localStorage.setItem('token', data.token);
-        setIsSignIn(true); // 회원가입 완료 후 로그인 화면으로
+        // ✅ 회원가입 성공 시 로그인 페이지로 이동 + 이메일 전달
+        navigate('/login', { state: { email: signupForm.email.trim() } });
       }
     } catch (e: any) {
       setError(e?.message || '오류가 발생했습니다.');
@@ -110,11 +118,21 @@ export default function Login() {
     }
   };
 
+  // ✅ 엔터 키로 제출 가능
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' && !loading) {
+      if (isSignIn && canLogin) handleSubmit();
+      else if (!isSignIn && canSignup) handleSubmit();
+    }
+  };
+
   // ---------- Render ----------
   return (
-      <div className={`container ${isSignIn ? 'sign-in' : 'sign-up'}`}>
+      <div
+          className={`container ${isSignIn ? 'sign-in' : 'sign-up'}`}
+          onKeyDown={handleKeyDown}
+      >
         <div className="row">
-
           {/* ---------- Sign Up ---------- */}
           <div className="col align-items-center flex-col sign-up">
             <div className="form-wrapper align-items-center">
@@ -160,13 +178,23 @@ export default function Login() {
                 {pwMismatch && <p className="error">비밀번호가 일치하지 않습니다.</p>}
                 {!pwMismatch && !isSignIn && error && <p className="error">{error}</p>}
 
-                <button className="btn" onClick={handleSubmit} disabled={!canSignup || loading}>
+                <button
+                    className={`btn ${!canSignup ? 'btn-disabled' : ''}`}
+                    onClick={handleSubmit}
+                    disabled={!canSignup || loading}
+                >
                   {loading ? 'Signing up…' : 'Sign up'}
                 </button>
 
                 <p>
                   <span>Already have an account?</span>{' '}
-                  <b onClick={() => { setError(''); setIsSignIn(true); }} className="pointer">
+                  <b
+                      onClick={() => {
+                        setError('');
+                        setIsSignIn(true);
+                      }}
+                      className="pointer"
+                  >
                     Sign in here
                   </b>
                 </p>
@@ -199,20 +227,29 @@ export default function Login() {
                 </div>
                 {isSignIn && error && <p className="error">{error}</p>}
 
-                <button className="btn" onClick={handleSubmit} disabled={!canLogin || loading}>
+                <button
+                    className={`btn ${!canLogin ? 'btn-disabled' : ''}`}
+                    onClick={handleSubmit}
+                    disabled={!canLogin || loading}
+                >
                   {loading ? 'Signing in…' : 'Sign in'}
                 </button>
 
                 <p>
                   <span>Don't have an account?</span>{' '}
-                  <b onClick={() => { setError(''); setIsSignIn(false); }} className="pointer">
+                  <b
+                      onClick={() => {
+                        setError('');
+                        setIsSignIn(false);
+                      }}
+                      className="pointer"
+                  >
                     Sign up here
                   </b>
                 </p>
               </div>
             </div>
           </div>
-
         </div>
       </div>
   );

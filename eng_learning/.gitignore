@@ -32,7 +32,7 @@ Thumbs.db
 *.tmp
 
 # Environment files (all)
-.env
+back/.env
 .env.local
 .env.development
 .env.production

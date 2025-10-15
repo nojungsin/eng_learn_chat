@@ -1,3 +1,24 @@
+/* 항상 라이트 팔레트 유지 (다크 모드여도 동일하게 표시) */
+html, body{
+  color-scheme: light !important;
+  background:#f5f7fb !important;
+}
+@media (prefers-color-scheme: dark){
+  html{ color-scheme: light !important; }
+  :root{
+    --bg:#f5f7fb !important;
+    --card:#ffffff !important;
+    --text:#1f2937 !important;
+    --muted:#6b7280 !important;
+    --brand:#7caaeb !important;
+    --brand-dark:#5d96dc !important;
+    --ai:#eef3ff !important;
+    --user:#7caaeb !important;
+    --ring:rgba(124,170,235,.45) !important;
+  }
+}
+
+/* 라이트 모드 기준 색상 고정 */
 :root{
   --bg:#f5f7fb;
   --card:#ffffff;
@@ -10,19 +31,6 @@
   --ring:rgba(124,170,235,.45);
   --shadow:0 14px 44px rgba(16,24,40,.12);
   --shadow-hover:0 18px 60px rgba(16,24,40,.18);
-}
-
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#0b1020;
-    --card:#12172a;
-    --text:#e5e7eb;
-    --muted:#a1a1aa;
-    --brand:#8fb7ff;
-    --brand-dark:#6a9df5;
-    --ai:#0f1730;
-    --user:#6a9df5;
-  }
 }
 
 /* 배경 */
@@ -73,7 +81,7 @@
   font-size:.85rem; color:var(--muted);
 }
 
-/* 종료 버튼 (우상단 칩) */
+/* 종료 버튼 */
 .exit-button{
   position:absolute; top:10px; left:10px;
   background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.86));
@@ -98,7 +106,6 @@
   padding:20px;
   z-index:3;
 }
-
 .topic-card{
   width:min(640px, 92%);
   background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.86));
@@ -180,10 +187,8 @@
   color:#fff; border-top-right-radius:6px;
 }
 
-/* 말풍선 메타(시간) */
-.meta{
-  margin-top:4px; font-size:.8rem; color:var(--muted);
-}
+/* 메타 */
+.meta{ margin-top:4px; font-size:.8rem; color:var(--muted); }
 .message-row.user .meta{ text-align:right; }
 
 /* 입력바 */
@@ -208,68 +213,53 @@
 .send-button:hover{ transform:translateY(-1px); box-shadow:0 12px 26px rgba(124,170,235,.45); }
 .send-button:disabled{ opacity:.6; cursor:not-allowed; box-shadow:none; }
 
-/* 플레이스홀더 색 */
+/* placeholder */
 ::placeholder{ color:#9aa3b2; }
 
-/* 모바일 압축 */
+/* 모바일 */
 @media (max-width:480px){
   .chat-box{ padding:12px; border-radius:16px; }
   .message-bubble{ max-width: 86%; }
 }
 
-/* ── 말풍선 내부 피드백: 패널 제거 버전 ─────────────────── */
+/* ── 말풍선 내부 피드백 ── */
 .b-sep{ margin:10px -2px 8px; height:1px; background:rgba(255,255,255,.35); }
 .message-bubble.ai .b-sep{ background:rgba(0,0,0,.12); }
 
-/* 패널 제거: 배경·그림자·외곽선 없음, 텍스트만 */
 .bfb{
-  padding: 0;                 /* 패널 여백 제거 */
-  background: transparent !important;
-  box-shadow: none !important;
-  color: inherit;             /* 버블 색상 상속 */
+  padding:0;
+  background:transparent !important;
+  box-shadow:none !important;
+  color:inherit;
 }
 
-/* 헤더 */
 .bfb-head{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
 .bfb-dot{ width:8px; height:8px; border-radius:999px; display:inline-block; }
 .bfb-label{ font-weight:800; font-size:.82rem; }
 
-/* 본문 */
 .bfb-explain{ font-size:.9rem; line-height:1.4; margin-bottom:6px; }
 .bfb-sg-title{ font-weight:700; font-size:.82rem; opacity:.9; margin-bottom:2px; }
 .bfb-sg-text{ line-height:1.35; }
 
-/* 사용자 버블(파란 배경)에서 읽기 좋은 색 */
 .message-bubble.user .bfb-label{ color: rgba(255,255,255,.95); }
 .message-bubble.user .bfb-explain,
 .message-bubble.user .bfb-sg-title,
 .message-bubble.user .bfb-sg-text{ color: rgba(255,255,255,.86); }
 
-/* AI 버블(밝은 배경) 색 */
 .message-bubble.ai .bfb-label{ color:#334155; }
 .message-bubble.ai .bfb-explain{ color: var(--muted); }
 .message-bubble.ai .bfb-sg-title{ color:#475569; }
 .message-bubble.ai .bfb-sg-text{ color: var(--text); }
 
-/* 레벨 표시: 점 색만 유지(패널 테두리 제거) */
 .bfb-dot.bfb-perfect{ background:#22c55e; }
 .bfb-dot.bfb-neutral{ background:#3b82f6; }
-.bfb-dot.bfb-needs{   background:#ef4444; }
+.bfb-dot.bfb-needs{ background:#ef4444; }
 
-/* 다크 모드에서 말풍선 색 대비 */
-@media (prefers-color-scheme: dark){
-  .b-sep{ background: rgba(255,255,255,.25); }
-  .message-bubble.ai .b-sep{ background: rgba(255,255,255,.08); }
-  .bfb{ background: var(--ai); }
-}
-/* 긴 영어 단어 줄바꿈 안전 */
 .bfb{ overflow-wrap:anywhere; }
 
-/* 모바일 여백 압축 */
 @media (max-width:480px){
   .bfb{ padding:8px; font-size:.9rem; }
   .b-sep{ margin:8px -2px 6px; }
 }
 
-/* 혹시 남아있을 구(旧) 피드백 스타일 비활성화 */
 .inline-feedback, .fb2-card{ display:none !important; }

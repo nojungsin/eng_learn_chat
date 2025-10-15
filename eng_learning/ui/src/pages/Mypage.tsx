@@ -13,16 +13,19 @@ export default function Mypage() {
       }
     };
 
+  // 로그인 이메일 가져오기
+  const email = localStorage.getItem('email');
   return (
     <div className="mypage-container">
       <div className="profile-header">
         <div className="profile-avatar" aria-hidden>👤</div>
         <div className="profile-info">
-          <h2>로그인하세요</h2>
+          {/* 이메일이 있으면 보여주고, 없으면 "로그인하세요" */}
+          <h2>{email ? email : '로그인하세요'}</h2>
           <p>당신의 페이지를 보세요.</p>
         </div>
-        <button onClick={go('/login')} className="login-btn" aria-label="회원가입 또는 로그인">
-          회원가입/로그인
+        <button onClick={go('/home')} className="login-btn" aria-label="회원가입 또는 로그인">
+        🏠 Home
         </button>
       </div>
 

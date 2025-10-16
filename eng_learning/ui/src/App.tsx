@@ -7,7 +7,7 @@ import Vocab from './pages/Vocab';
 import Service from './pages/Service';
 import Chat from './pages/Chat';
 import Test from './pages/Test';
-import Personaldata from './pages/Personaldata';
+import PersonalData from './pages/PersonalData';
 import Announcements from './pages/Announcements';
 import Report from './pages/Report';
 import Mypage from './pages/Mypage';
@@ -18,7 +18,7 @@ import Text from './pages/Text';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 
-// ✅ 로그인 여부 확인용 PrivateRoute
+// 로그인 여부 확인용 PrivateRoute
 function PrivateRoute({ children }: { children: React.ReactElement }) {
     const token = localStorage.getItem('token');
     return token ? children : <Navigate to="/login" replace />;
@@ -39,7 +39,7 @@ function App() {
                 <Route path="/service" element={<Service />} />
                 <Route path="/mypage" element={<Mypage />} />{/* ✅ /mypage 라우트 설정 */}
                 <Route path="/report" element={<Report />} />
-                <Route path="/personaldata" element={<Personaldata />} />
+                <Route path="/personaldata" element={<PersonalData />} />
                 <Route path="/choose" element={<Choose />} />
                 <Route path="/voice" element={<Voice />} />
                 <Route path="/text" element={<Text />} />

@@ -271,9 +271,7 @@ export default function Voice() {
 
             <div className="voice-transcript">
               <div className={`pill ${recording ? 'live' : ''}`}>{recording ? '● LIVE' : 'READY'}</div>
-              <div className="transcript-text">
-                {interim ? <em>{interim}</em> : (finalText ? finalText : '마이크를 켜고 말해보세요')}
-              </div>
+
             </div>
 
             <div className="voice-controls">

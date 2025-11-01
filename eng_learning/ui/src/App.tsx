@@ -37,7 +37,7 @@ function App() {
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/announcements" element={<Announcements />} />
                 <Route path="/service" element={<Service />} />
-                <Route path="/mypage" element={<Mypage />} />{/* ✅ /mypage 라우트 설정 */}
+                <Route path="/mypage" element={<Mypage />} />{/*mypage 라우트 설정 */}
                 <Route path="/report" element={<Report />} />
                 <Route path="/personaldata" element={<PersonalData />} />
                 <Route path="/choose" element={<Choose />} />

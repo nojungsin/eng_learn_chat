@@ -9,6 +9,7 @@ type AuthResponse = {
   user?: { id: number; username: string; email: string };
 };
 
+//로그인 함수
 export default function Login() {
   const [isSignIn, setIsSignIn] = useState(true);
   const [loginForm, setLoginForm] = useState({
@@ -26,7 +27,7 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ✅ 회원가입 후 이메일 자동 입력
+  //회원가입 후 로그인 페이지로 넘어갈 때 이메일 자동 입력
   useEffect(() => {
     if (location.state?.email) {
       setLoginForm((prev) => ({ ...prev, email: location.state.email }));
@@ -90,10 +91,31 @@ export default function Login() {
             password: loginForm.password,
           }),
         });
-        const data: AuthResponse = await res.json();
-        if (!res.ok) throw new Error(data?.message || '로그인 실패');
-        if (data.token) localStorage.setItem('token', data.token);
-        navigate('/home');
+        if (isSignIn) {
+          if (!canLogin) return;
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: loginForm.email.trim(),
+              password: loginForm.password,
+            }),
+          });
+
+          // 1) HTTP 코드 검사
+          const data: AuthResponse = await res.json().catch(() => ({} as AuthResponse));
+          if (!res.ok) throw new Error(data?.message || '로그인 실패');
+
+          // 2) 바디 검사(필수)
+          if (!data?.token) {
+            throw new Error(data?.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
+          }
+
+          // 3) 성공 분기에서만 저장+이동
+          localStorage.setItem('token', data.token);
+          navigate('/home', { replace: true }); // 뒤로가기로 재진입 방지
+        }
+
       } else {
         if (!canSignup) return;
         const res = await fetch('/api/auth/register', {
@@ -108,7 +130,7 @@ export default function Login() {
         });
         const data: AuthResponse = await res.json();
         if (!res.ok) throw new Error(data?.message || '회원가입 실패');
-        // ✅ 회원가입 성공 시 로그인 페이지로 이동 + 이메일 전달
+        // 회원가입 성공 시 로그인 페이지로 이동 + 이메일 전달
         navigate('/login', { state: { email: signupForm.email.trim() } });
       }
     } catch (e: any) {
@@ -118,7 +140,7 @@ export default function Login() {
     }
   };
 
-  // ✅ 엔터 키로 제출 가능
+  //엔터 키로 제출
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' && !loading) {
       if (isSignIn && canLogin) handleSubmit();
@@ -133,7 +155,7 @@ export default function Login() {
           onKeyDown={handleKeyDown}
       >
         <div className="row">
-          {/* ---------- Sign Up ---------- */}
+          {/*회원가입 페이지*/}
           <div className="col align-items-center flex-col sign-up">
             <div className="form-wrapper align-items-center">
               <div className="form sign-up">
@@ -202,7 +224,7 @@ export default function Login() {
             </div>
           </div>
 
-          {/* ---------- Sign In ---------- */}
+          {/* 로그인 페이지*/}
           <div className="col align-items-center flex-col sign-in">
             <div className="form-wrapper align-items-center">
               <div className="form sign-in">

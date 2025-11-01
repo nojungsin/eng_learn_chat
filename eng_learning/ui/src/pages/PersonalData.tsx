@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Personaldata.css';
+import './PersonalData.css';
 
 export default function PersonalData() {
   const navigate = useNavigate();

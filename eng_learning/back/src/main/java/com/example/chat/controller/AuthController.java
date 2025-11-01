@@ -25,9 +25,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        String token = authService.login(request); // AuthService에서 JWT 토큰 반환
-        ApiResponse response = new ApiResponse(true, "로그인 성공", token);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
+        LoginResponse res = authService.login(req);
+
+        // success가 false면 400(Bad Request)으로 내려줌
+        if (!res.isSuccess()) {
+            return ResponseEntity.badRequest().body(res);
+        }
+        return ResponseEntity.ok(res);
     }
 }

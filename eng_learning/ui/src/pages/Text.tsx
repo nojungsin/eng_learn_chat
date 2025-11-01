@@ -86,25 +86,73 @@ export default function Chat() {
     addMessage('ai', `Let's start the roleplay about "${topic}". You can type your first line!`);
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const text = input.trim();
     if (!text) return;
 
-    const feedback = genFeedback(text);
-    const msg: Message = {
-      id: `${Date.now()}-${Math.random()}`,
+    // 사용자 메시지 우선 추가
+    const msgId = `${Date.now()}-${Math.random()}`;
+    const userMsg: Message = {
+      id: msgId,
       role: 'user',
       content: text,
       time: Date.now(),
-      feedback,
     };
-    setMessages(prev => [...prev, msg]);
+    setMessages(prev => [...prev, userMsg]);
     setInput('');
 
-    setTimeout(() => {
-      addMessage('ai', `AI: "${text}" 에 대한 응답 예시입니다.`);
-    }, 350);
+    try {
+      // FastAPI 호출
+      const res = await fetch('http://localhost:8000/api/chat/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: selectedTopic,
+          ai_role: 'doctor',   // 나중에 역할 선택 추가 가능
+          user_role: 'patient',
+          message: text,
+        }),
+      });
+
+      if (!res.ok) throw new Error('AI 서버 응답 실패');
+      const data = await res.json();
+
+      //Gemini 응답 두 가지 (사용자에게 응답 / 피드백)
+      const aiText = data.reply;
+      const replyMatch = aiText.match(/\[AI Reply\]:(.*?)(?=\[Feedback\]|$)/s);
+      const feedbackMatch = aiText.match(/\[Feedback\]:(.*)/s);
+
+      const aiReply = replyMatch ? replyMatch[1].trim() : aiText.trim();
+      const feedbackText = feedbackMatch ? feedbackMatch[1].trim() : '';
+
+      // 왼쪽 AI 메시지 추가
+      addMessage('ai', aiReply);
+
+      // 오른쪽 내 메시지 피드백 업데이트
+      if (feedbackText) {
+        setMessages(prev => prev.map(m =>
+            m.id === msgId
+                ? {
+                  ...m,
+                  feedback: {
+                    level: 'neutral',
+                    label: 'AI Feedback',
+                    score: 0,
+                    explain: feedbackText,
+                    suggestion: '',
+                    original: text,
+                  },
+                }
+                : m
+        ));
+      }
+
+    } catch (err) {
+      console.error(err);
+      addMessage('ai', '⚠️ AI 서버와의 통신에 실패했습니다.');
+    }
   };
+
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') { e.preventDefault(); handleSend(); }

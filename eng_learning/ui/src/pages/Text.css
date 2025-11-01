@@ -263,3 +263,59 @@ html, body{
 }
 
 .inline-feedback, .fb2-card{ display:none !important; }
+/* Voice와 동일한 토픽 카드 스타일 */
+.voice-topic-grid { margin-top:.5rem; display:grid; grid-template-columns:1fr; gap:.5rem; }
+.voice-topic-item { display:flex; align-items:center; gap:.75rem; padding:.75rem; border:1px solid #eee; border-radius:12px; background:#fcfcfc; cursor:pointer; }
+.voice-topic-item:hover { background:#f6f6f6; }
+.voice-topic-emoji { font-size:1.5rem; }
+.voice-topic-main { flex:1; }
+.voice-topic-title { font-weight:700; }
+.voice-topic-desc { font-size:.9rem; color:#666; }
+.voice-topic-chevron { color:#bbb; }
+
+
+/* Voice와 동일한 토픽 카드 */
+.voice-topic-overlay { padding:1rem; }
+.voice-topic-card {
+  background:#fff; border:1px solid #eee; border-radius:12px; padding:1rem;
+}
+.voice-topic-card h3 { margin:0 0 8px; text-align:left; color:var(--text); font-size:1.1rem; font-weight:800; }
+.voice-topic-grid { margin-top:.5rem; display:grid; grid-template-columns:1fr; gap:.5rem; }
+.voice-topic-item {
+  display:flex; align-items:center; gap:.75rem; padding:.75rem;
+  border:1px solid #eee; border-radius:12px; background:#fcfcfc; cursor:pointer;
+}
+.voice-topic-item:hover { background:#f6f6f6; }
+.voice-topic-emoji { font-size:1.5rem; }
+.voice-topic-main { flex:1; }
+.voice-topic-title { font-weight:700; }
+.voice-topic-desc { font-size:.9rem; color:#666; }
+.voice-topic-chevron { color:#bbb; }
+
+/* 상단바 (Voice 동일) */
+.voice-topbar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:.75rem 1rem;
+  border-bottom:1px solid #eee;
+}
+.back-btn {
+  border:none;
+  background:transparent;
+  font-size:1.25rem;
+  cursor:pointer;
+}
+.voice-chat-header {
+  font-weight:700;
+  font-size:1rem;
+}
+.exit-chip {
+  border:1px solid #ddd;
+  background:#f8f8f8;
+  padding:.25rem .6rem;
+  border-radius:999px;
+  font-size:.85rem;
+  cursor:pointer;
+}
+.spacer { width:24px; }

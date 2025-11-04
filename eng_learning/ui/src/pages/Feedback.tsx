@@ -1,43 +1,113 @@
+// src/pages/Feedback.tsx
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import './Feedback.css';
 
+/** ==== Types ==== */
+type Topic = 'Grammar' | 'Vocabulary' | 'Conversation';
 type Level = 'excellent' | 'good' | 'needs-work';
+
 type FeedbackItem = {
-  topic: 'Grammar' | 'Vocabulary' | 'Conversation';
+  topics: Topic[];          // 복수 카테고리 지원
   feedback: string;
-  score: number; // 0~100
+  score: number;            // 0~100
   level: Level;
-  date: string; // yyyy-mm-dd
+  date: string;             // yyyy-mm-dd
 };
 
-const INITIAL_FEEDBACK: FeedbackItem[] = [
-  { topic: 'Grammar',     feedback: '문법적 오류가 일부 있었어요. 시제 일치와 관사 사용을 중심으로 보완해보면 좋아요.', score: 72, level: 'needs-work', date: '2025-09-09' },
-  { topic: 'Vocabulary',  feedback: '단어 선택은 적절했어요. 같은 표현 반복을 줄이고 동의어를 다양화해보면 더 좋아요.',   score: 84, level: 'good',       date: '2025-09-09' },
-  { topic: 'Conversation',feedback: '대화 흐름은 자연스러웠고 템포도 좋았어요. 억양/발음은 특정 단어에서 살짝 뭉개졌어요.',   score: 88, level: 'good',       date: '2025-09-08' },
+/** ==== (데모) 초기 데이터 - 과거 단일 topic 형식도 섞여 있어도 OK ==== */
+type RawFeedback = {
+  topics?: unknown;         // 배열/문자열/누락 모두 가능
+  topic?: unknown;          // 과거 단일 키
+  feedback?: unknown;
+  score?: unknown;
+  level?: unknown;
+  date?: unknown;
+};
+
+const INITIAL_FEEDBACK_RAW: RawFeedback[] = [
+  {
+    topic: 'Grammar',
+    feedback: '문법적 오류가 일부 있었어요. 시제 일치와 관사 사용을 중심으로 보완해보면 좋아요.',
+    score: 72, level: 'needs-work', date: '2025-09-09',
+  },
+  {
+    topic: 'Vocabulary',
+    feedback: '단어 선택은 적절했어요. 같은 표현 반복을 줄이고 동의어를 다양화해보면 더 좋아요.',
+    score: 84, level: 'good', date: '2025-09-09',
+  },
+  {
+    topic: 'Conversation',
+    feedback: '대화 흐름은 자연스러웠고 템포도 좋았어요. 억양/발음은 특정 단어에서 살짝 뭉개졌어요.',
+    score: 88, level: 'good', date: '2025-09-08',
+  },
+  // 복수 카테고리 예시
+  {
+    topics: ['Grammar', 'Vocabulary'],
+    feedback: '시제와 단어 선택 모두 개선 포인트가 있어요.',
+    score: 78, level: 'good', date: '2025-09-10',
+  },
+  {
+    topics: 'Grammar, Vocabulary, Conversation',
+    feedback: '전반적으로 고르게 발전 가능성이 보여요.',
+    score: 81, level: 'good', date: '2025-09-11',
+  },
 ];
 
-const TABS: Array<'All' | FeedbackItem['topic']> = ['All', 'Grammar', 'Vocabulary', 'Conversation'];
+/** ==== 유틸: 모든 입력을 topics: Topic[] 로 정규화 ==== */
+const toTopics = (raw: unknown): Topic[] => {
+  const asTopic = (v: string): Topic | null =>
+    v === 'Grammar' || v === 'Vocabulary' || v === 'Conversation' ? v : null;
+
+  if (Array.isArray(raw)) {
+    const arr = raw.map(String).map(s => s.trim()).map(asTopic).filter(Boolean) as Topic[];
+    return arr.length ? arr : ['Grammar'];
+  }
+  if (typeof raw === 'string') {
+    const arr = raw.split(',').map(s => s.trim()).map(asTopic).filter(Boolean) as Topic[];
+    return arr.length ? arr : ['Grammar'];
+  }
+  return ['Grammar'];
+};
+
+const normalizeItem = (raw: RawFeedback): FeedbackItem => ({
+  topics: toTopics(raw.topics ?? raw.topic),
+  feedback: String(raw.feedback ?? ''),
+  score: Number(raw.score ?? 0),
+  level:
+    raw.level === 'excellent' || raw.level === 'good' || raw.level === 'needs-work'
+      ? (raw.level as Level)
+      : 'good',
+  date: String(raw.date ?? ''),
+});
+
+/** ==== 탭 ==== */
+const TABS: Array<'All' | Topic> = ['All', 'Grammar', 'Vocabulary', 'Conversation'];
 
 export default function Feedback() {
   const navigate = useNavigate();
-  const location = useLocation() as { state?: { newFeedback?: FeedbackItem } };
+  const location = useLocation() as { state?: { newFeedback?: RawFeedback | RawFeedback[] } };
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const initialList = location.state?.newFeedback
-    ? [location.state.newFeedback, ...INITIAL_FEEDBACK]
-    : INITIAL_FEEDBACK;
+  /** location.state -> 배열/단일 모두 수용 후 정규화 */
+  const fromStateRaw: RawFeedback[] = Array.isArray(location.state?.newFeedback)
+    ? (location.state?.newFeedback as RawFeedback[])
+    : location.state?.newFeedback
+    ? [location.state.newFeedback as RawFeedback]
+    : [];
 
-  const [activeTab, setActiveTab] = useState<(typeof TABS)[number]>('All');
+  const initialList: FeedbackItem[] = [...fromStateRaw, ...INITIAL_FEEDBACK_RAW].map(normalizeItem);
+
+  const [activeTab, setActiveTab] = useState<'All' | Topic>('All');
   const [feedbackList] = useState<FeedbackItem[]>(initialList);
 
-  // 1) 사용 가능한 날짜 목록 (중복 제거 + 최신순 정렬)
+  /** 사용 가능한 날짜 목록 (중복 제거 + 최신순) */
   const availableDates = useMemo(() => {
     const set = new Set(feedbackList.map(f => f.date));
     return Array.from(set).sort((a, b) => (a < b ? 1 : -1)); // desc
   }, [feedbackList]);
 
-  // 2) URL ?date=yyyy-mm-dd 지원 (직접 링크/새로고침 호환)
+  /** URL ?date=yyyy-mm-dd 지원 */
   const initialDateFromUrl = searchParams.get('date');
   const [selectedDate, setSelectedDate] = useState<string | null>(initialDateFromUrl);
 
@@ -45,7 +115,6 @@ export default function Feedback() {
     if (initialDateFromUrl && availableDates.includes(initialDateFromUrl)) {
       setSelectedDate(initialDateFromUrl);
     } else if (initialDateFromUrl && !availableDates.includes(initialDateFromUrl)) {
-      // 존재하지 않는 날짜가 들어온 경우 제거
       searchParams.delete('date');
       setSearchParams(searchParams, { replace: true });
       setSelectedDate(null);
@@ -55,7 +124,7 @@ export default function Feedback() {
 
   const handleSelectDate = (date: string) => {
     setSelectedDate(date);
-    setSearchParams({ date }); // 주소창에 반영 (공유/새로고침 안전)
+    setSearchParams({ date }); // 주소창 반영
   };
 
   const resetDate = () => {
@@ -64,15 +133,18 @@ export default function Feedback() {
     setSearchParams(searchParams, { replace: true });
   };
 
-  // 3) 날짜 기반 1차 필터
+  /** 날짜 기반 1차 필터 */
   const dateFiltered = useMemo(() => {
     if (!selectedDate) return [];
     return feedbackList.filter(f => f.date === selectedDate);
   }, [feedbackList, selectedDate]);
 
-  // 4) 탭 기반 2차 필터
+  /** 탭 기반 2차 필터 (복수 카테고리 대응) */
   const filtered = useMemo(
-    () => (activeTab === 'All' ? dateFiltered : dateFiltered.filter(f => f.topic === activeTab)),
+    () =>
+      activeTab === 'All'
+        ? dateFiltered
+        : dateFiltered.filter(f => (f.topics ?? []).includes(activeTab)),
     [activeTab, dateFiltered]
   );
 
@@ -90,24 +162,25 @@ export default function Feedback() {
         {/* Header */}
         <div className="feedback-header">
           <h2>💬 피드백</h2>
-          {/* ★ 오른쪽 상단 X 버튼 추가 */}
           <button
             type="button"
             className="close-button"
             aria-label="닫기"
             onClick={() => navigate('/home', { replace: true })}
-           >
+          >
             ×
           </button>
         </div>
 
-        {/* [Step 1] 날짜 선택 화면 */}
+        {/* [Step 1] 날짜 선택 */}
         {!selectedDate && (
           <>
             <h3 className="date-section-title">
               📅 날짜 선택
               {availableDates.length > 0 && (
-                <button className="date-reset" onClick={resetDate}>초기화</button>
+                <button className="date-reset" onClick={resetDate}>
+                  초기화
+                </button>
               )}
             </h3>
 
@@ -131,13 +204,14 @@ export default function Feedback() {
           </>
         )}
 
-        {/* [Step 2] 날짜 선택 후 상세 화면 */}
+        {/* [Step 2] 상세 */}
         {selectedDate && (
           <>
-            {/* 선택한 날짜 표시 + 다른 날짜로 변경 */}
             <h3 className="date-section-title">
               📅 선택한 날짜: <span>{selectedDate}</span>
-              <button className="date-reset" onClick={resetDate}>다른 날짜 선택</button>
+              <button className="date-reset" onClick={resetDate}>
+                다른 날짜 선택
+              </button>
             </h3>
 
             {/* Summary */}
@@ -174,10 +248,18 @@ export default function Feedback() {
                 {filtered.map((item, idx) => (
                   <li key={`${item.date}-${idx}`} className="feedback-item">
                     <div className="item-head">
-                      <span className={`topic-badge topic-${item.topic.toLowerCase()}`}>
-                        {item.topic}
+                      {/* 여러 카테고리 뱃지 (가드 포함) */}
+                      <div className="topic-badges" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        {(item.topics ?? []).map(t => (
+                          <span key={t} className={`topic-badge topic-${t.toLowerCase()}`}>
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+
+                      <span className={`level-chip level-${item.level}`}>
+                        {levelLabel(item.level)}
                       </span>
-                      <span className={`level-chip level-${item.level}`}>{levelLabel(item.level)}</span>
                     </div>
 
                     <div className="score-wrap" aria-label={`점수: ${item.score}점`}>

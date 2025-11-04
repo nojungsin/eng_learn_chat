@@ -16,7 +16,7 @@
 .voice-chat-box {
   width:100%;
   max-width:860px;
-  height:80vh;
+  /*height:auto;*/
   background:linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,.66)), #ffffff;
   backdrop-filter:blur(10px);
   border:1px solid rgba(125,125,125,.10);
@@ -28,6 +28,11 @@
   position:relative;
   overflow:hidden;
 }
+/* 채팅 중(오버레이가 없을 때)만 80vh 유지 */
+.voice-chat-box:not(:has(.voice-topic-overlay)) { height: 80vh; }
+
+/* 주제 선택 화면(오버레이가 있을 때)은 내용 높이 */
+.voice-chat-box:has(.voice-topic-overlay) { height: auto; }
 
 /* top bar */
 .voice-topbar { display:flex; align-items:center; justify-content:space-between; padding:.75rem 1rem; border-bottom:1px solid #eee; }
@@ -37,8 +42,15 @@
 .spacer { width:24px; }
 
 /* topic picker */
-.voice-topic-overlay { padding:1rem; }
-.voice-topic-card { background:#fff; border:1px solid #eee; border-radius:12px; padding:1rem; }
+/* 시작 전(주제 선택) 화면: 내용은 위에 붙이고 필요 시만 스크롤 */
+.voice-topic-overlay {
+  flex: 1;                 /* 상단/하단 여백 없이 꽉 차되 */
+  display: flex;
+  align-items: flex-start;  /* 카드가 위에 붙음 → 아래 큰 공백 느낌 사라짐 */
+  overflow: auto;           /* 항목 많으면 스크롤 */
+}
+/* 카드가 가로로 꽉 차게 */
+.voice-topic-card { width:100%; }
 .voice-topic-grid { margin-top:.5rem; display:grid; grid-template-columns:1fr; gap:.5rem; }
 .voice-topic-item { display:flex; align-items:center; gap:.75rem; padding:.75rem; border:1px solid #eee; border-radius:12px; background:#fcfcfc; cursor:pointer; }
 .voice-topic-item:hover { background:#f6f6f6; }
@@ -49,8 +61,19 @@
 .voice-topic-chevron { color:#bbb; }
 .sr-warn { margin:.5rem 0; color:#b00020; font-size:.9rem; }
 
+
 /* messages */
-.voice-chat-messages { max-height:46vh; overflow:auto; padding:1rem; display:flex; flex-direction:column; gap:.75rem; background:#fff; }
+.voice-chat-messages {
+  max-height:46vh;
+  flex: 1;
+  min-height: 0;          /* flex 컨테이너에서 스크롤 제대로 되게 */
+  overflow: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  background: #fff;
+}
 .vmsg-row { display:flex; align-items:flex-end; gap:.5rem; }
 .vmsg-row.ai { justify-content:flex-start; }
 .vmsg-row.user { justify-content:flex-end; }
@@ -73,21 +96,21 @@
 .bfb-sg-title { font-size:.8rem; font-weight:700; color:#333; margin-top:.25rem; }
 .bfb-sg-text { font-size:.9rem; color:#222; }
 
-/* transcript */
-.voice-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 3px;              /* 기존 16px → 8px */
-  margin-top: 1px;       /* 상단 여백 줄이기 */
-  margin-bottom: 1px;    /* 하단 여백 줄이기 */
-}.pill { display:inline-block; padding:.1rem .5rem; border:1px solid #ddd; border-radius:999px; font-size:.8rem; color:#666; margin-bottom:.25rem; }
+
+.pill { display:inline-block; padding:.1rem .5rem; border:1px solid #ddd; border-radius:999px; font-size:.8rem; color:#666; margin-bottom:.25rem; }
 .pill.live { border-color:#ef4444; color:#ef4444; }
 .transcript-text { font-size:1rem; color:#222; min-height:1.5em; }
 .transcript-text em { color:#666; }
 
 /* controls */
-.voice-controls { display:flex; align-items:center; justify-content:center; gap:1rem; padding:1rem; }
+.voice-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;              /* 너가 원하는 간격으로 하나만 남겨둬 */
+  padding: 1rem;
+  margin-top: auto;       /* 핵심: 남은 공간을 위로 밀어 버튼을 바닥에 고정 */
+}
 .mic-btn {
   width: 64px;           /* 기존 90px → 64px */
   height: 64px;

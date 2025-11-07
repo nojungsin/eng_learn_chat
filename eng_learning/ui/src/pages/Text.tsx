@@ -192,9 +192,6 @@ export default function Chat() {
   return (
     <div className="chat-container">
       <div className="chat-box">
-        {isTopicSelected && (
-          <button className="exit-button" onClick={handleExit} aria-label="세션 종료">종료</button>
-        )}
 
         <div className="voice-topbar">
           <button className="back-btn" onClick={() => navigate('/home')} aria-label="뒤로가기">←</button>

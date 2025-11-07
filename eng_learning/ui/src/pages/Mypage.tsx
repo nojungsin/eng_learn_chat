@@ -79,8 +79,8 @@ export default function Mypage() {
           className="menu-item"
           role="menuitem"
           tabIndex={0}
-          onClick={go('/personal-data')}
-          onKeyDown={onKeyActivate('/personal-data')}
+          onClick={go('/personaldata')}
+          onKeyDown={onKeyActivate('/personaldata')}
         >
           <span className="menu-icon">🔐</span>
           <div className="menu-texts">

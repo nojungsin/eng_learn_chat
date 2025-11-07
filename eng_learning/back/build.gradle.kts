@@ -45,7 +45,8 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
 
     // PostgreSQL 드라이버
-    runtimeOnly("org.postgresql:postgresql:42.7.4")
+    implementation ("org.postgresql:postgresql")
+    //runtimeOnly("org.postgresql:postgresql:42.7.4")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

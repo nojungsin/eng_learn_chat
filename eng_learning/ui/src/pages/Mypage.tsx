@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import './Mypage.css';
+import {useEffect, useState} from "react";
 
 export default function Mypage() {
   const navigate = useNavigate();
@@ -13,16 +14,44 @@ export default function Mypage() {
       }
     };
 
-  // 로그인 이메일 가져오기
-  const email = localStorage.getItem('email');
+  //화면에 띄울 사용자 정보들
+  const [username, setUsername] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+
+  useEffect(() => {
+    // 브라우저 환경 체크(SSR 대비)
+    if (typeof window === 'undefined') return;
+
+    const t = localStorage.getItem('token');
+    if (!t) return; // 비로그인 상태면 그냥 종료
+
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/me', {
+          headers: { Authorization: `Bearer ${t}` },
+        });
+        if (!res.ok) throw new Error('me 요청 실패');
+
+        const me = await res.json();
+        setUsername(me.username ?? '');
+        setEmail(me.email ?? '');
+
+        // 원하면 로컬스토리지에도 저장
+        //localStorage.setItem('username', me.username ?? '');
+        //localStorage.setItem('email', me.email ?? '');
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, []);
+
   return (
     <div className="mypage-container">
       <div className="profile-header">
         <div className="profile-avatar" aria-hidden>👤</div>
         <div className="profile-info">
-          {/* 이메일이 있으면 보여주고, 없으면 "로그인하세요" */}
-          <h2>{email ? email : '로그인하세요'}</h2>
-          <p>당신의 페이지를 보세요.</p>
+          <h2>{`${username}`}</h2>
+          <p>{`${email}`}</p>
         </div>
         <button onClick={go('/home')} className="login-btn" aria-label="회원가입 또는 로그인">
         🏠 Home

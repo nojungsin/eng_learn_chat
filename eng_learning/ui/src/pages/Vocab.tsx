@@ -2,26 +2,21 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Vocab.css";
 
-type VocabWord = {
-  id: number;
+type Vocabulary = {
+  vocaid: number;
   word: string;
-  meaning: string;
+  kmeaning: string;
   example?: string;
   known: boolean;
-  createdAt?: string;
 };
 
 type ApiError = { message?: string };
 
-// ✅ 항상 Headers 객체를 반환 (타입 에러 해결)
+// 항상 Headers 객체를 반환 (타입 에러 해결)
 const authHeaders = (): Headers => {
   const h = new Headers();
   const t = localStorage.getItem("token");
   if (t) h.set("Authorization", `Bearer ${t}`);
-
-  const email = localStorage.getItem("email");
-  if (email) h.set("X-Email", email);
-
   return h;
 };
 
@@ -54,9 +49,9 @@ async function fetchJSON<T = any>(url: string, init?: RequestInit): Promise<T> {
 export default function Vocab() {
   const nav = useNavigate();
 
-  const [words, setWords] = useState<VocabWord[]>([]);
+  const [words, setWords] = useState<Vocabulary[]>([]);
   const [newWord, setNewWord] = useState("");
-  const [newMeaning, setNewMeaning] = useState("");
+  const [newKMeaning, setNewKMeaning] = useState("");
   const [newExample, setNewExample] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,16 +60,11 @@ export default function Vocab() {
   useEffect(() => {
     (async () => {
       const token = localStorage.getItem("token");
-      const email = localStorage.getItem("email");   // ★ 추가
-      if (!token || !email) {                        // ★ 추가
-        setLoading(false);
-        nav("/login");
-        return;
-      }
+      if (!token) { nav("/login"); return; }
+
       try {
-        const data = await fetchJSON<VocabWord[]>("/api/vocab", {
-          headers: authHeaders(),
-        });
+        await fetchJSON("/api/auth/me", { headers: authHeaders() }); // 검증
+        const data = await fetchJSON<Vocabulary[]>("/api/voca", { headers: authHeaders() });
         setWords(data);
       } catch (e: any) {
         if (e?.status === 401) nav("/login");
@@ -85,15 +75,16 @@ export default function Vocab() {
     })();
   }, [nav]);
 
+
   const resetForm = () => {
     setNewWord("");
-    setNewMeaning("");
+    setNewKMeaning("");
     setNewExample("");
   };
 
   const onAdd = async () => {
     const w = newWord.trim();
-    const m = newMeaning.trim();
+    const m = newKMeaning.trim();
     const ex = newExample.trim();
     if (!w || !m) {
       setError("단어와 뜻을 입력해 주세요.");
@@ -101,10 +92,10 @@ export default function Vocab() {
     }
     setError(null);
     try {
-      const created = await fetchJSON<VocabWord>("/api/vocab", {
+      const created = await fetchJSON<Vocabulary>("/api/voca", {
         method: "POST",
         headers: jsonHeaders(),
-        body: JSON.stringify({ word: w, meaning: m, example: ex }),
+        body: JSON.stringify({ word: w, kmeaning: m, example: ex }),
       });
       setWords((prev) => [created, ...prev]);
       resetForm();
@@ -124,7 +115,7 @@ export default function Vocab() {
   const toggleKnown = async (index: number) => {
     const item = words[index];
     try {
-      const updated = await fetchJSON<VocabWord>(`/api/vocab/${item.id}`, {
+      const updated = await fetchJSON<Vocabulary>(`/api/voca/${item.vocaid}`, {
         method: "PATCH",
         headers: jsonHeaders(),
         body: JSON.stringify({ known: !item.known }),
@@ -137,9 +128,9 @@ export default function Vocab() {
   };
 
   const onDelete = async (index: number) => {
-    const id = words[index].id;
+    const vocaid = words[index].vocaid;
     try {
-      const r = await fetch(`/api/vocab/${id}`, {
+      const r = await fetch(`/api/voca/${vocaid}`, {
         method: "DELETE",
         headers: authHeaders(),
       });
@@ -188,8 +179,8 @@ export default function Vocab() {
           <input
             className="vocab-input"
             placeholder="뜻 (예: 고맙게 여기다)"
-            value={newMeaning}
-            onChange={(e) => setNewMeaning(e.target.value)}
+            value={newKMeaning}
+            onChange={(e) => setNewKMeaning(e.target.value)}
             onKeyDown={onKeyDown}
           />
           <input
@@ -212,7 +203,7 @@ export default function Vocab() {
         ) : (
           <ul className="vocab-list">
             {words.map((w, i) => (
-              <li key={w.id} className={`vocab-item ${w.known ? "known" : ""}`}>
+              <li key={w.vocaid} className={`vocab-item ${w.known ? "known" : ""}`}>
                 <div className="vocab-top-row">
                   <h3>{w.word}</h3>
                   <div className="vocab-actions">
@@ -229,7 +220,7 @@ export default function Vocab() {
                     </button>
                   </div>
                 </div>
-                <p>📖 뜻: {w.meaning}</p>
+                <p>📖 뜻: {w.kmeaning}</p>
                 {w.example && <p>✏️ 예문: {w.example}</p>}
               </li>
             ))}

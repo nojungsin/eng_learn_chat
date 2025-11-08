@@ -1,7 +1,8 @@
 from langchain.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-def create_roleplay_chain(topic: str, ai_role: str, user_role: str):
+# 체인: 사용자 발화까지 템플릿에 포함 (이전 버전은 user_message를 안 받았음)
+def create_roleplay_chain():
     prompt = ChatPromptTemplate.from_template("""
 You are participating in an English role-play conversation.
 
@@ -10,6 +11,8 @@ You are participating in an English role-play conversation.
 - User's role: {user_role}
 - Objective: Practice natural English conversation.
 
+User just said: "{user_message}"
+
 When replying to the user:
 1. Continue the conversation naturally based on your role.
 2. After responding, provide feedback:
@@ -17,13 +20,13 @@ When replying to the user:
    - Better word choices
    - Clarity or sentence improvement
 
-Respond in this format:
+Respond strictly in this format:
 [AI Reply]: ...
 [Feedback]: ...
 """)
-    model = ChatGoogleGenerativeAI(model="gemini-1.5-pro")
+    # 현재 프로젝트가 잘 도는 모델명을 유지
+    model = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
     return prompt | model
-
 
 def create_initial_prompt(topic: str, ai_role: str, user_role: str):
     return f"""
@@ -32,7 +35,7 @@ Start a natural conversation about {topic}.
 Say a short greeting first.
 """
 
-
+# (옵션) 필요 시 계속 사용할 수 있도록 남겨둠 — 지금은 사용 안 함
 def create_feedback_prompt(topic: str, ai_role: str, user_role: str, user_message: str):
     return f"""
 Topic: {topic}

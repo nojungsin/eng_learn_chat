@@ -5,7 +5,7 @@ import './Home.css';
 export default function Home() {
   const navigate = useNavigate();
 
-  // ✅ 로그인 상태 확인 (토큰 없으면 로그인 페이지로 이동)
+  // 로그인 상태 확인 (토큰 없으면 로그인 페이지로 이동)
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -24,7 +24,7 @@ export default function Home() {
             }
           };
 
-  // ✅ 로그아웃 함수
+  // 로그아웃 함수
   const handleLogout = () => {
     localStorage.removeItem('token'); // 토큰 삭제
     navigate('/login', { replace: true }); // 로그인 페이지로 이동 (뒤로가기 방지)
@@ -96,7 +96,7 @@ export default function Home() {
           </div>
 
           <div className="home-footer">
-            {/* ✅ 로그아웃 버튼 수정 */}
+            {/* 로그아웃 버튼 수정 */}
             <button
                 className="logout-btn"
                 onClick={handleLogout}

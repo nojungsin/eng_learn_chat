@@ -1,28 +1,40 @@
 package com.example.chat.controller;
 
-import com.example.chat.service.ChatService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/chat")
 public class ChatController {
 
-    private final ChatService chatService;
+    private final WebClient webClient;
 
-    public ChatController(ChatService chatService) {
-        this.chatService = chatService;
+    //텍스트 채팅
+    @PostMapping("/text")
+    public Mono<Map<String,Object>> text(@RequestBody Map<String,Object> body) {
+        return webClient.post()
+                .uri("http://localhost:8000/text-chat")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<>() {});
     }
 
-    @PostMapping
-    public Mono<Map<String, String>> chat(@RequestBody Map<String, String> request) {
-        String topic = request.getOrDefault("topic", "General conversation");
-        String userMessage = request.getOrDefault("userMessage", "");
-        String messages = request.getOrDefault("messages", "");
-
-        return chatService.generateReply(topic, userMessage, messages)
-                .map(reply -> Map.of("reply", reply));
+    //보이스 채팅
+    @PostMapping("/voice")
+    public Mono<Map<String,Object>> voice(@RequestBody Map<String,Object> body) {
+        return webClient.post()
+                .uri("http://localhost:8000/voice-chat")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<>() {});
     }
 }

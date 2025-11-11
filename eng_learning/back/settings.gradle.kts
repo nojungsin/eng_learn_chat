@@ -1,2 +1,2 @@
-// back/settings.gradle.kts
-rootProject.name = "back"
+rootProject.name = "eng_learning"
+include("back")

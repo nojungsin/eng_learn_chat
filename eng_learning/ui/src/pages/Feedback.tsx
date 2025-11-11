@@ -7,283 +7,326 @@ import './Feedback.css';
 type Topic = 'Grammar' | 'Vocabulary' | 'Conversation';
 type Level = 'excellent' | 'good' | 'needs-work';
 
-type FeedbackItem = {
-  topics: Topic[];          // 복수 카테고리 지원
-  feedback: string;
-  score: number;            // 0~100
+type Report = {
+  id: number;
+  date: string; // yyyy-mm-dd
+  topic: string;
+  avgGrammar?: number | null;
+  avgVocabulary?: number | null;
+  avgConversation?: number | null;
+};
+
+type DetailDTO = {
+  topics: Topic[];   // 복수 카테고리
+  feedback: string;  // (grammar/vocabulary/conv 합친 텍스트 혹은 서버에서 가공)
+  score: number;     // 0~100
   level: Level;
-  date: string;             // yyyy-mm-dd
+  date: string;      // yyyy-mm-dd (보여줄 용)
 };
 
-/** ==== (데모) 초기 데이터 - 과거 단일 topic 형식도 섞여 있어도 OK ==== */
-type RawFeedback = {
-  topics?: unknown;         // 배열/문자열/누락 모두 가능
-  topic?: unknown;          // 과거 단일 키
-  feedback?: unknown;
-  score?: unknown;
-  level?: unknown;
-  date?: unknown;
-};
+/** ==== 서버 호출 유틸 ==== */
+async function fetchReportDates(): Promise<string[]> {
+  const res = await fetch('/api/feedback/report-dates', { credentials: 'include' });
+  if (!res.ok) return [];
+  return await res.json();
+}
 
-const INITIAL_FEEDBACK_RAW: RawFeedback[] = [
-  {
-    topic: 'Grammar',
-    feedback: '문법적 오류가 일부 있었어요. 시제 일치와 관사 사용을 중심으로 보완해보면 좋아요.',
-    score: 72, level: 'needs-work', date: '2025-09-09',
-  },
-  {
-    topic: 'Vocabulary',
-    feedback: '단어 선택은 적절했어요. 같은 표현 반복을 줄이고 동의어를 다양화해보면 더 좋아요.',
-    score: 84, level: 'good', date: '2025-09-09',
-  },
-  {
-    topic: 'Conversation',
-    feedback: '대화 흐름은 자연스러웠고 템포도 좋았어요. 억양/발음은 특정 단어에서 살짝 뭉개졌어요.',
-    score: 88, level: 'good', date: '2025-09-08',
-  },
-  // 복수 카테고리 예시
-  {
-    topics: ['Grammar', 'Vocabulary'],
-    feedback: '시제와 단어 선택 모두 개선 포인트가 있어요.',
-    score: 78, level: 'good', date: '2025-09-10',
-  },
-  {
-    topics: 'Grammar, Vocabulary, Conversation',
-    feedback: '전반적으로 고르게 발전 가능성이 보여요.',
-    score: 81, level: 'good', date: '2025-09-11',
-  },
-];
+async function fetchReportsByDate(date: string): Promise<Report[]> {
+  const res = await fetch(`/api/feedback/reports?date=${encodeURIComponent(date)}`, {
+    credentials: 'include',
+  });
+  if (!res.ok) return [];
+  return await res.json();
+}
 
-/** ==== 유틸: 모든 입력을 topics: Topic[] 로 정규화 ==== */
-const toTopics = (raw: unknown): Topic[] => {
-  const asTopic = (v: string): Topic | null =>
-    v === 'Grammar' || v === 'Vocabulary' || v === 'Conversation' ? v : null;
-
-  if (Array.isArray(raw)) {
-    const arr = raw.map(String).map(s => s.trim()).map(asTopic).filter(Boolean) as Topic[];
-    return arr.length ? arr : ['Grammar'];
-  }
-  if (typeof raw === 'string') {
-    const arr = raw.split(',').map(s => s.trim()).map(asTopic).filter(Boolean) as Topic[];
-    return arr.length ? arr : ['Grammar'];
-  }
-  return ['Grammar'];
-};
-
-const normalizeItem = (raw: RawFeedback): FeedbackItem => ({
-  topics: toTopics(raw.topics ?? raw.topic),
-  feedback: String(raw.feedback ?? ''),
-  score: Number(raw.score ?? 0),
-  level:
-    raw.level === 'excellent' || raw.level === 'good' || raw.level === 'needs-work'
-      ? (raw.level as Level)
-      : 'good',
-  date: String(raw.date ?? ''),
-});
+async function fetchDetailsByReportId(reportId: number): Promise<DetailDTO[]> {
+  const res = await fetch(`/api/feedback/details?reportId=${reportId}`, {
+    credentials: 'include',
+  });
+  if (!res.ok) return [];
+  return await res.json();
+}
 
 /** ==== 탭 ==== */
 const TABS: Array<'All' | Topic> = ['All', 'Grammar', 'Vocabulary', 'Conversation'];
 
 export default function Feedback() {
   const navigate = useNavigate();
-  const location = useLocation() as { state?: { newFeedback?: RawFeedback | RawFeedback[] } };
+  const location = useLocation() as {
+    state?: { highlightReportId?: number };
+  };
   const [searchParams, setSearchParams] = useSearchParams();
 
-  /** location.state -> 배열/단일 모두 수용 후 정규화 */
-  const fromStateRaw: RawFeedback[] = Array.isArray(location.state?.newFeedback)
-    ? (location.state?.newFeedback as RawFeedback[])
-    : location.state?.newFeedback
-    ? [location.state.newFeedback as RawFeedback]
-    : [];
+  /** 상태 */
+  const [dates, setDates] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  const initialList: FeedbackItem[] = [...fromStateRaw, ...INITIAL_FEEDBACK_RAW].map(normalizeItem);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [selectedReportId, setSelectedReportId] = useState<number | null>(null);
+
+  const [details, setDetails] = useState<DetailDTO[]>([]);
 
   const [activeTab, setActiveTab] = useState<'All' | Topic>('All');
-  const [feedbackList] = useState<FeedbackItem[]>(initialList);
-
-  /** 사용 가능한 날짜 목록 (중복 제거 + 최신순) */
-  const availableDates = useMemo(() => {
-    const set = new Set(feedbackList.map(f => f.date));
-    return Array.from(set).sort((a, b) => (a < b ? 1 : -1)); // desc
-  }, [feedbackList]);
 
   /** URL ?date=yyyy-mm-dd 지원 */
   const initialDateFromUrl = searchParams.get('date');
-  const [selectedDate, setSelectedDate] = useState<string | null>(initialDateFromUrl);
 
+  /** 최초: 날짜 목록 로드 */
   useEffect(() => {
-    if (initialDateFromUrl && availableDates.includes(initialDateFromUrl)) {
-      setSelectedDate(initialDateFromUrl);
-    } else if (initialDateFromUrl && !availableDates.includes(initialDateFromUrl)) {
-      searchParams.delete('date');
-      setSearchParams(searchParams, { replace: true });
-      setSelectedDate(null);
-    }
+    (async () => {
+      const d = await fetchReportDates();
+      setDates(d);
+      // URL에 date가 있으면 우선 적용, 없으면 선택 대기
+      if (initialDateFromUrl && d.includes(initialDateFromUrl)) {
+        setSelectedDate(initialDateFromUrl);
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialDateFromUrl, availableDates.join('|')]);
+  }, []);
 
+  /** 날짜가 선택되면 리포트 목록 로드 */
+  useEffect(() => {
+    if (!selectedDate) return;
+    (async () => {
+      const list = await fetchReportsByDate(selectedDate);
+      setReports(list);
+
+      // 하이라이트 reportId가 있으면 우선 선택
+      const targetId = location.state?.highlightReportId ?? null;
+
+      if (targetId && list.some(r => r.id === targetId)) {
+        setSelectedReportId(targetId);
+      } else if (list.length === 1) {
+        // 하나뿐이면 자동 선택
+        setSelectedReportId(list[0].id);
+      } else {
+        setSelectedReportId(null);
+        setDetails([]);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate]);
+
+  /** 리포트가 선택되면 디테일 로드 */
+  useEffect(() => {
+    if (!selectedReportId) return;
+    (async () => {
+      const det = await fetchDetailsByReportId(selectedReportId);
+      setDetails(det);
+    })();
+  }, [selectedReportId]);
+
+  /** 날짜 카드 클릭 */
   const handleSelectDate = (date: string) => {
     setSelectedDate(date);
     setSearchParams({ date }); // 주소창 반영
+    setActiveTab('All');
   };
 
+  /** 날짜 초기화 */
   const resetDate = () => {
     setSelectedDate(null);
+    setReports([]);
+    setSelectedReportId(null);
+    setDetails([]);
     searchParams.delete('date');
     setSearchParams(searchParams, { replace: true });
   };
 
-  /** 날짜 기반 1차 필터 */
-  const dateFiltered = useMemo(() => {
-    if (!selectedDate) return [];
-    return feedbackList.filter(f => f.date === selectedDate);
-  }, [feedbackList, selectedDate]);
-
-  /** 탭 기반 2차 필터 (복수 카테고리 대응) */
+  /** 탭 기반 필터 */
   const filtered = useMemo(
-    () =>
-      activeTab === 'All'
-        ? dateFiltered
-        : dateFiltered.filter(f => (f.topics ?? []).includes(activeTab)),
-    [activeTab, dateFiltered]
+      () =>
+          activeTab === 'All'
+              ? details
+              : details.filter(f => (f.topics ?? []).includes(activeTab)),
+      [activeTab, details]
   );
 
+  /** 평균 점수(현재 필터 반영) */
   const avgScore = useMemo(() => {
     if (filtered.length === 0) return 0;
     return Math.round(filtered.reduce((sum, f) => sum + f.score, 0) / filtered.length);
   }, [filtered]);
 
   const levelLabel = (level: Level) =>
-    level === 'excellent' ? '우수' : level === 'good' ? '양호' : '개선 필요';
+      level === 'excellent' ? '우수' : level === 'good' ? '양호' : '개선 필요';
+
+  /** 선택된 리포트(요약 평균 등 표시용으로 쓰고 싶으면 사용) */
+  const selectedReport = useMemo(
+      () => reports.find(r => r.id === selectedReportId) ?? null,
+      [reports, selectedReportId]
+  );
 
   return (
-    <div className="feedback-container">
-      <div className="feedback-card compact">
-        {/* Header */}
-        <div className="feedback-header">
-          <h2>💬 피드백</h2>
-          <button
-            type="button"
-            className="close-button"
-            aria-label="닫기"
-            onClick={() => navigate('/home', { replace: true })}
-          >
-            ×
-          </button>
-        </div>
+      <div className="feedback-container">
+        <div className="feedback-card compact">
+          {/* Header */}
+          <div className="feedback-header">
+            <h2>💬 피드백</h2>
+            <button
+                type="button"
+                className="close-button"
+                aria-label="닫기"
+                onClick={() => navigate('/home', { replace: true })}
+            >
+              ×
+            </button>
+          </div>
 
-        {/* [Step 1] 날짜 선택 */}
-        {!selectedDate && (
-          <>
-            <h3 className="date-section-title">
-              📅 날짜 선택
-              {availableDates.length > 0 && (
-                <button className="date-reset" onClick={resetDate}>
-                  초기화
-                </button>
-              )}
-            </h3>
+          {/* [Step 1] 날짜 선택 */}
+          {!selectedDate && (
+              <>
+                <h3 className="date-section-title">
+                  📅 날짜 선택
+                  {dates.length > 0 && (
+                      <button className="date-reset" onClick={resetDate}>
+                        초기화
+                      </button>
+                  )}
+                </h3>
 
-            {availableDates.length === 0 ? (
-              <p className="empty">아직 등록된 피드백 날짜가 없습니다.</p>
-            ) : (
-              <div className="date-picker" role="listbox" aria-label="피드백 날짜 목록">
-                {availableDates.map(date => (
-                  <button
-                    key={date}
-                    className={`date-card ${selectedDate === date ? 'active' : ''}`}
-                    role="option"
-                    aria-selected={selectedDate === date}
-                    onClick={() => handleSelectDate(date)}
-                  >
-                    {date}
+                {dates.length === 0 ? (
+                    <p className="empty">아직 등록된 피드백 날짜가 없습니다.</p>
+                ) : (
+                    <div className="date-picker" role="listbox" aria-label="피드백 날짜 목록">
+                      {dates.map(date => (
+                          <button
+                              key={date}
+                              className={`date-card ${selectedDate === date ? 'active' : ''}`}
+                              role="option"
+                              aria-selected={selectedDate === date}
+                              onClick={() => handleSelectDate(date)}
+                          >
+                            {date}
+                          </button>
+                      ))}
+                    </div>
+                )}
+              </>
+          )}
+
+          {/* [Step 2] 날짜 선택 후 상세 */}
+          {selectedDate && (
+              <>
+                <h3 className="date-section-title">
+                  📅 선택한 날짜: <span>{selectedDate}</span>
+                  <button className="date-reset" onClick={resetDate}>
+                    다른 날짜 선택
                   </button>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+                </h3>
 
-        {/* [Step 2] 상세 */}
-        {selectedDate && (
-          <>
-            <h3 className="date-section-title">
-              📅 선택한 날짜: <span>{selectedDate}</span>
-              <button className="date-reset" onClick={resetDate}>
-                다른 날짜 선택
-              </button>
-            </h3>
+                {/* (선택) 리포트 선택: 동일 날짜에 여러 리포트가 있을 때 */}
+                {reports.length > 1 && (
+                    <div className="report-picker" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                      <span style={{ alignSelf: 'center' }}>리포트 선택:</span>
+                      {reports.map(r => (
+                          <button
+                              key={r.id}
+                              className={`report-chip ${selectedReportId === r.id ? 'active' : ''}`}
+                              onClick={() => setSelectedReportId(r.id)}
+                              title={`평균 G:${r.avgGrammar ?? '-'} / V:${r.avgVocabulary ?? '-'} / C:${r.avgConversation ?? '-'}`}
+                          >
+                            {r.topic || 'No Topic'}
+                          </button>
+                      ))}
+                    </div>
+                )}
 
-            {/* Summary */}
-            <section className="summary" aria-label="요약">
-              <div className="summary-item">
-                <span className="summary-label">총 항목</span>
-                <strong className="summary-value">{filtered.length}개</strong>
-              </div>
-              <div className="summary-item">
-                <span className="summary-label">평균 점수</span>
-                <strong className="summary-value">{avgScore}</strong>
-              </div>
-            </section>
+                {/* Summary */}
+                <section className="summary" aria-label="요약">
+                  <div className="summary-item">
+                    <span className="summary-label">총 항목</span>
+                    <strong className="summary-value">{filtered.length}개</strong>
+                  </div>
+                  <div className="summary-item">
+                    <span className="summary-label">평균 점수</span>
+                    <strong className="summary-value">{avgScore}</strong>
+                  </div>
+                  {/* 선택된 리포트의 카테고리별 평균(서버 계산치)을 참고용으로 보여주고 싶다면: */}
+                  {selectedReport && (
+                      <>
+                        <div className="summary-item">
+                          <span className="summary-label">Grammar 평균</span>
+                          <strong className="summary-value">
+                            {selectedReport.avgGrammar ?? '-'}
+                          </strong>
+                        </div>
+                        <div className="summary-item">
+                          <span className="summary-label">Vocabulary 평균</span>
+                          <strong className="summary-value">
+                            {selectedReport.avgVocabulary ?? '-'}
+                          </strong>
+                        </div>
+                        <div className="summary-item">
+                          <span className="summary-label">Conversation 평균</span>
+                          <strong className="summary-value">
+                            {selectedReport.avgConversation ?? '-'}
+                          </strong>
+                        </div>
+                      </>
+                  )}
+                </section>
 
-            {/* Tabs */}
-            <nav className="tabs" aria-label="피드백 카테고리">
-              {TABS.map(tab => (
-                <button
-                  key={tab}
-                  className={`tab ${activeTab === tab ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab === 'All' ? '전체' : tab}
-                </button>
-              ))}
-            </nav>
+                {/* Tabs */}
+                <nav className="tabs" aria-label="피드백 카테고리">
+                  {TABS.map(tab => (
+                      <button
+                          key={tab}
+                          className={`tab ${activeTab === tab ? 'active' : ''}`}
+                          onClick={() => setActiveTab(tab)}
+                      >
+                        {tab === 'All' ? '전체' : tab}
+                      </button>
+                  ))}
+                </nav>
 
-            {/* List */}
-            <h3 className="section-title">사용자 피드백</h3>
-            {filtered.length === 0 ? (
-              <p className="empty">이 날짜에는 선택한 카테고리의 피드백이 없습니다.</p>
-            ) : (
-              <ul className="feedback-list" role="list">
-                {filtered.map((item, idx) => (
-                  <li key={`${item.date}-${idx}`} className="feedback-item">
-                    <div className="item-head">
-                      {/* 여러 카테고리 뱃지 (가드 포함) */}
-                      <div className="topic-badges" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        {(item.topics ?? []).map(t => (
-                          <span key={t} className={`topic-badge topic-${t.toLowerCase()}`}>
+                {/* List */}
+                <h3 className="section-title">사용자 피드백</h3>
+                {selectedReportId == null ? (
+                    <p className="empty">리포트를 선택하세요.</p>
+                ) : filtered.length === 0 ? (
+                    <p className="empty">이 날짜에는 선택한 카테고리의 피드백이 없습니다.</p>
+                ) : (
+                    <ul className="feedback-list" role="list">
+                      {filtered.map((item, idx) => (
+                          <li key={`${item.date}-${idx}`} className="feedback-item">
+                            <div className="item-head">
+                              {/* 여러 카테고리 뱃지 */}
+                              <div className="topic-badges" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                {(item.topics ?? []).map(t => (
+                                    <span key={t} className={`topic-badge topic-${t.toLowerCase()}`}>
                             {t}
                           </span>
-                        ))}
-                      </div>
+                                ))}
+                              </div>
 
-                      <span className={`level-chip level-${item.level}`}>
+                              <span className={`level-chip level-${item.level}`}>
                         {levelLabel(item.level)}
                       </span>
-                    </div>
+                            </div>
 
-                    <div className="score-wrap" aria-label={`점수: ${item.score}점`}>
-                      <div className="score-bar">
-                        <div className="score-fill" style={{ width: `${item.score}%` }} />
-                      </div>
-                      <span className="score-text">{item.score}</span>
-                    </div>
+                            <div className="score-wrap" aria-label={`점수: ${item.score}점`}>
+                              <div className="score-bar">
+                                <div className="score-fill" style={{ width: `${item.score}%` }} />
+                              </div>
+                              <span className="score-text">{item.score}</span>
+                            </div>
 
-                    <details className="feedback-details">
-                      <summary className="details-summary">세부 코멘트 보기</summary>
-                      <p className="feedback-text">{item.feedback}</p>
-                    </details>
+                            <details className="feedback-details">
+                              <summary className="details-summary">세부 코멘트 보기</summary>
+                              <p className="feedback-text">{item.feedback}</p>
+                            </details>
 
-                    <div className="meta">
-                      <span className="date">🗓 {item.date}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
+                            <div className="meta">
+                              <span className="date">🗓 {item.date}</span>
+                            </div>
+                          </li>
+                      ))}
+                    </ul>
+                )}
+              </>
+          )}
+        </div>
       </div>
-    </div>
   );
 }

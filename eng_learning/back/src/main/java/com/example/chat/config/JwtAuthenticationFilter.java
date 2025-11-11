@@ -37,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (Exception ignored) {
-                // 유효하지 않은 토큰이면 인증 안 넣고 통과 → 아래 EntryPoint가 401 리턴
+                //01 리턴
             }
         }
         chain.doFilter(req, res);

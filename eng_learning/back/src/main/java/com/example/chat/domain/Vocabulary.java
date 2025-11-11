@@ -5,7 +5,11 @@ import lombok.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "vocabulary")
+@Table(name = "vocabulary",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "word"})
+        }
+        )
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder
@@ -17,7 +21,7 @@ public class Vocabulary {
     private Long vocaid;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(nullable = false, length = 100)

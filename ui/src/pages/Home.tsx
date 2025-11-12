@@ -7,7 +7,7 @@ export default function Home() {
 
   // 로그인 상태 확인 (토큰 없으면 로그인 페이지로 이동)
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       navigate('/login', { replace: true });
     }

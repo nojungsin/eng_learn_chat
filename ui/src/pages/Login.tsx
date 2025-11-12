@@ -3,11 +3,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import '../pages/Login.css';
 
 type AuthResponse = {
-  ok?: boolean;
-  message?: string;
-  token?: string;
-  user?: { id: number; username: string; email: string };
+    success?: boolean;
+    message?: string;
+    accessToken?: string; // 백엔드와 합의된 키
+    token?: string;       // 혹시 기존 코드 호환
+    user?: { id: number; username: string; email: string };
 };
+
 
 //로그인 함수
 export default function Login() {
@@ -77,70 +79,89 @@ export default function Login() {
   );
 
   // ---------- Submit Handler ----------
-  const handleSubmit = async () => {
-    setError('');
-    setLoading(true);
-    try {
-      if (isSignIn) {
-        if (!canLogin) return;
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: loginForm.email.trim(),
-            password: loginForm.password,
-          }),
-        });
-        if (isSignIn) {
-          if (!canLogin) return;
-          const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              email: loginForm.email.trim(),
-              password: loginForm.password,
-            }),
-          });
+    const handleSubmit = async (e?: React.FormEvent) => {
+        e?.preventDefault();
+        setError('');
+        setLoading(true);
+        try {
+            if (isSignIn) {
+                // ===== 로그인 =====
+                if (!canLogin) return;
 
-          // 1) HTTP 코드 검사
-          const data: AuthResponse = await res.json().catch(() => ({} as AuthResponse));
-          if (!res.ok) throw new Error(data?.message || '로그인 실패');
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: loginForm.email.trim(),
+                        password: loginForm.password,
+                    }),
+                });
 
-          // 2) 바디 검사(필수)
-          if (!data?.token) {
-            throw new Error(data?.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
-          }
+                // 응답 파싱 (빈 바디/비 JSON 방어)
+                const ct = res.headers.get('content-type') || '';
+                if (!ct.includes('application/json')) {
+                    // ★ 여기서 바로 막아버리면 index.html 같은 비JSON 응답을 즉시 잡아냄
+                    throw new Error(
+                        `서버가 JSON이 아닌 응답을 반환했습니다. (content-type=${ct}) ` +
+                        `API 경로/프록시 설정을 확인하세요.`
+                    );
+                }
+                const data: any = ct.includes('application/json') ? await res.json() : {};
 
-          // 3) 성공 분기에서만 저장+이동
-          localStorage.setItem('token', data.token);
-          navigate('/home', { replace: true }); // 뒤로가기로 재진입 방지
+                //
+                if (!res.ok || data.success === false) {
+                    throw new Error(data?.message || `로그인 실패 (HTTP ${res.status})`);
+                }
+
+                // 백엔드 키 이름에 맞춰 저장 (accessToken 사용)
+                const token: string | undefined = data.accessToken ?? data.token;
+                if (!token) throw new Error('토큰이 없습니다.');
+
+                localStorage.setItem('accessToken', token);
+                navigate('/home', { replace: true });
+
+            } else {
+                // ===== 회원가입 =====
+                if (!canSignup) return;
+
+                const payload = {
+                    username: signupForm.username.trim(),
+                    email: signupForm.email.trim(),
+                    password: signupForm.password,
+                    confirmPassword: signupForm.confirmPassword,
+                };
+
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: signupForm.username.trim(),
+                        email: signupForm.email.trim(),
+                        password: signupForm.password,
+                        confirmPassword: signupForm.confirmPassword,
+                    }),
+                });
+
+                const ct = res.headers.get('content-type') || '';
+                const data: any = ct.includes('application/json') ? await res.json() : {};
+
+                if (!res.ok || data.success === false) {
+                    throw new Error(data?.message || `회원가입 실패 (HTTP ${res.status})`);
+                }
+
+                // 회원가입 성공 → 로그인 탭으로 전환 + 이메일 자동 채움
+                setIsSignIn(true);
+                setLoginForm((f) => ({ ...f, email: signupForm.email.trim() }));
+            }
+        } catch (e: any) {
+            setError(e?.message || '요청 처리 중 오류가 발생했습니다.');
+        } finally {
+            setLoading(false);
         }
+    };
 
-      } else {
-        if (!canSignup) return;
-        const res = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: signupForm.username.trim(),
-            email: signupForm.email.trim(),
-            password: signupForm.password,
-            confirmPassword: signupForm.confirmPassword,
-          }),
-        });
-        const data: AuthResponse = await res.json();
-        if (!res.ok) throw new Error(data?.message || '회원가입 실패');
-        // 회원가입 성공 시 로그인 페이지로 이동 + 이메일 전달
-        navigate('/login', { state: { email: signupForm.email.trim() } });
-      }
-    } catch (e: any) {
-      setError(e?.message || '오류가 발생했습니다.');
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  //엔터 키로 제출
+    //엔터 키로 제출
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' && !loading) {
       if (isSignIn && canLogin) handleSubmit();

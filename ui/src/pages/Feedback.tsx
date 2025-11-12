@@ -1,6 +1,6 @@
 // src/pages/Feedback.tsx
 import { useMemo, useState, useEffect } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import './Feedback.css';
 
 /** ==== Types ==== */
@@ -8,282 +8,293 @@ type Topic = 'Grammar' | 'Vocabulary' | 'Conversation';
 type Level = 'excellent' | 'good' | 'needs-work';
 
 type FeedbackItem = {
-  topics: Topic[];          // 복수 카테고리 지원
-  feedback: string;
-  score: number;            // 0~100
-  level: Level;
-  date: string;             // yyyy-mm-dd
+    topics: Topic[];
+    feedback: string;
+    score: number;
+    level: Level;
+    date: string; // yyyy-mm-dd
 };
 
-/** ==== (데모) 초기 데이터 - 과거 단일 topic 형식도 섞여 있어도 OK ==== */
-type RawFeedback = {
-  topics?: unknown;         // 배열/문자열/누락 모두 가능
-  topic?: unknown;          // 과거 단일 키
-  feedback?: unknown;
-  score?: unknown;
-  level?: unknown;
-  date?: unknown;
-};
+type ReportDate = { reportId: number; date: string };
 
-const INITIAL_FEEDBACK_RAW: RawFeedback[] = [
-  {
-    topic: 'Grammar',
-    feedback: '문법적 오류가 일부 있었어요. 시제 일치와 관사 사용을 중심으로 보완해보면 좋아요.',
-    score: 72, level: 'needs-work', date: '2025-09-09',
-  },
-  {
-    topic: 'Vocabulary',
-    feedback: '단어 선택은 적절했어요. 같은 표현 반복을 줄이고 동의어를 다양화해보면 더 좋아요.',
-    score: 84, level: 'good', date: '2025-09-09',
-  },
-  {
-    topic: 'Conversation',
-    feedback: '대화 흐름은 자연스러웠고 템포도 좋았어요. 억양/발음은 특정 단어에서 살짝 뭉개졌어요.',
-    score: 88, level: 'good', date: '2025-09-08',
-  },
-  // 복수 카테고리 예시
-  {
-    topics: ['Grammar', 'Vocabulary'],
-    feedback: '시제와 단어 선택 모두 개선 포인트가 있어요.',
-    score: 78, level: 'good', date: '2025-09-10',
-  },
-  {
-    topics: 'Grammar, Vocabulary, Conversation',
-    feedback: '전반적으로 고르게 발전 가능성이 보여요.',
-    score: 81, level: 'good', date: '2025-09-11',
-  },
-];
+/** ==== API ==== */
+async function fetchReportDates(userId: number): Promise<ReportDate[]> {
+    const res = await fetch(`/api/feedback/report-dates?userId=${userId}`);
+    if (!res.ok) throw new Error('failed to load report dates');
+    return res.json();
+}
 
-/** ==== 유틸: 모든 입력을 topics: Topic[] 로 정규화 ==== */
-const toTopics = (raw: unknown): Topic[] => {
-  const asTopic = (v: string): Topic | null =>
-    v === 'Grammar' || v === 'Vocabulary' || v === 'Conversation' ? v : null;
+async function fetchDetails(userId: number, reportId: number): Promise<FeedbackItem[]> {
+    const res = await fetch(`/api/feedback/reports/${reportId}/details?userId=${userId}`);
+    if (!res.ok) throw new Error('failed to load details');
+    // 서버에서 이미 형식 맞춰서 내려오므로 그대로 사용
+    const data = (await res.json()) as FeedbackItem[];
+    // 토픽/레벨 가드 (혹시 서버가 빈 토픽 보낼 때 대비)
+    const asTopic = (v: string): Topic | null =>
+        v === 'Grammar' || v === 'Vocabulary' || v === 'Conversation' ? v : null;
 
-  if (Array.isArray(raw)) {
-    const arr = raw.map(String).map(s => s.trim()).map(asTopic).filter(Boolean) as Topic[];
-    return arr.length ? arr : ['Grammar'];
-  }
-  if (typeof raw === 'string') {
-    const arr = raw.split(',').map(s => s.trim()).map(asTopic).filter(Boolean) as Topic[];
-    return arr.length ? arr : ['Grammar'];
-  }
-  return ['Grammar'];
-};
+    return data.map(d => ({
+        topics: Array.isArray(d.topics)
+            ? (d.topics.map(String).map(s => s.trim()).map(asTopic).filter(Boolean) as Topic[])
+            : ['Grammar'],
+        feedback: String(d.feedback ?? ''),
+        score: Number.isFinite(d.score as number) ? (d.score as number) : 0,
+        level:
+            d.level === 'excellent' || d.level === 'good' || d.level === 'needs-work'
+                ? (d.level as Level)
+                : 'good',
+        date: String(d.date ?? ''),
+    }));
+}
 
-const normalizeItem = (raw: RawFeedback): FeedbackItem => ({
-  topics: toTopics(raw.topics ?? raw.topic),
-  feedback: String(raw.feedback ?? ''),
-  score: Number(raw.score ?? 0),
-  level:
-    raw.level === 'excellent' || raw.level === 'good' || raw.level === 'needs-work'
-      ? (raw.level as Level)
-      : 'good',
-  date: String(raw.date ?? ''),
-});
-
-/** ==== 탭 ==== */
+/** ==== 유틸 ==== */
 const TABS: Array<'All' | Topic> = ['All', 'Grammar', 'Vocabulary', 'Conversation'];
 
+/** ==== 실제 페이지 ==== */
 export default function Feedback() {
-  const navigate = useNavigate();
-  const location = useLocation() as { state?: { newFeedback?: RawFeedback | RawFeedback[] } };
-  const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
 
-  /** location.state -> 배열/단일 모두 수용 후 정규화 */
-  const fromStateRaw: RawFeedback[] = Array.isArray(location.state?.newFeedback)
-    ? (location.state?.newFeedback as RawFeedback[])
-    : location.state?.newFeedback
-    ? [location.state.newFeedback as RawFeedback]
-    : [];
+    // ★ 현재 로그인 사용자 ID를 얻는 부분 (네 프로젝트 방식에 맞춰 수정해)
+    // - 예: 로그인 시 localStorage.setItem('userId', '123');
+    const getCurrentUserId = (): number | null => {
+        const raw = localStorage.getItem('userId');
+        if (!raw) return null;
+        const n = Number(raw);
+        return Number.isFinite(n) ? n : null;
+    };
 
-  const initialList: FeedbackItem[] = [...fromStateRaw, ...INITIAL_FEEDBACK_RAW].map(normalizeItem);
+    const [userId, setUserId] = useState<number | null>(getCurrentUserId());
+    const [dates, setDates] = useState<ReportDate[]>([]);
+    const [loadingDates, setLoadingDates] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'All' | Topic>('All');
-  const [feedbackList] = useState<FeedbackItem[]>(initialList);
+    const initialDateFromUrl = searchParams.get('date');
+    const [selectedDate, setSelectedDate] = useState<string | null>(initialDateFromUrl);
 
-  /** 사용 가능한 날짜 목록 (중복 제거 + 최신순) */
-  const availableDates = useMemo(() => {
-    const set = new Set(feedbackList.map(f => f.date));
-    return Array.from(set).sort((a, b) => (a < b ? 1 : -1)); // desc
-  }, [feedbackList]);
+    const [activeTab, setActiveTab] = useState<'All' | Topic>('All');
+    const [items, setItems] = useState<FeedbackItem[]>([]);
+    const [loadingItems, setLoadingItems] = useState(false);
 
-  /** URL ?date=yyyy-mm-dd 지원 */
-  const initialDateFromUrl = searchParams.get('date');
-  const [selectedDate, setSelectedDate] = useState<string | null>(initialDateFromUrl);
+    /** Step 1: userId로 날짜 목록 로드 */
+    useEffect(() => {
+        if (!userId) return;
 
-  useEffect(() => {
-    if (initialDateFromUrl && availableDates.includes(initialDateFromUrl)) {
-      setSelectedDate(initialDateFromUrl);
-    } else if (initialDateFromUrl && !availableDates.includes(initialDateFromUrl)) {
-      searchParams.delete('date');
-      setSearchParams(searchParams, { replace: true });
-      setSelectedDate(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialDateFromUrl, availableDates.join('|')]);
+        (async () => {
+            setLoadingDates(true);
+            setError(null);
+            try {
+                const list = await fetchReportDates(userId);
+                setDates(list);
+                // URL ?date=... 있으면 유지, 없으면 최신 날짜 자동 선택 X (사용자 클릭)
+                if (initialDateFromUrl) {
+                    const ok = list.some(r => r.date === initialDateFromUrl);
+                    if (!ok) {
+                        searchParams.delete('date');
+                        setSearchParams(searchParams, { replace: true });
+                        setSelectedDate(null);
+                    }
+                }
+            } catch (e: any) {
+                setError(e?.message ?? '날짜 로드 실패');
+            } finally {
+                setLoadingDates(false);
+            }
+        })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [userId]);
 
-  const handleSelectDate = (date: string) => {
-    setSelectedDate(date);
-    setSearchParams({ date }); // 주소창 반영
-  };
+    /** Step 2: 날짜 선택 → reportId 찾고 detail 로드 */
+    useEffect(() => {
+        if (!userId || !selectedDate) {
+            setItems([]);
+            return;
+        }
+        const found = dates.find(d => d.date === selectedDate);
+        if (!found) {
+            setItems([]);
+            return;
+        }
+        (async () => {
+            setLoadingItems(true);
+            setError(null);
+            try {
+                const data = await fetchDetails(userId, found.reportId);
+                setItems(data);
+            } catch (e: any) {
+                setError(e?.message ?? '상세 로드 실패');
+                setItems([]);
+            } finally {
+                setLoadingItems(false);
+            }
+        })();
+    }, [userId, selectedDate, dates]);
 
-  const resetDate = () => {
-    setSelectedDate(null);
-    searchParams.delete('date');
-    setSearchParams(searchParams, { replace: true });
-  };
+    /** UI 핸들러 */
+    const handleSelectDate = (date: string) => {
+        setSelectedDate(date);
+        setSearchParams({ date }); // 주소창 반영
+    };
 
-  /** 날짜 기반 1차 필터 */
-  const dateFiltered = useMemo(() => {
-    if (!selectedDate) return [];
-    return feedbackList.filter(f => f.date === selectedDate);
-  }, [feedbackList, selectedDate]);
+    const resetDate = () => {
+        setSelectedDate(null);
+        searchParams.delete('date');
+        setSearchParams(searchParams, { replace: true });
+        setItems([]);
+    };
 
-  /** 탭 기반 2차 필터 (복수 카테고리 대응) */
-  const filtered = useMemo(
-    () =>
-      activeTab === 'All'
-        ? dateFiltered
-        : dateFiltered.filter(f => (f.topics ?? []).includes(activeTab)),
-    [activeTab, dateFiltered]
-  );
+    /** 탭 필터 */
+    const filtered = useMemo(
+        () =>
+            activeTab === 'All'
+                ? items
+                : items.filter(f => (f.topics ?? []).includes(activeTab)),
+        [activeTab, items]
+    );
 
-  const avgScore = useMemo(() => {
-    if (filtered.length === 0) return 0;
-    return Math.round(filtered.reduce((sum, f) => sum + f.score, 0) / filtered.length);
-  }, [filtered]);
+    const avgScore = useMemo(() => {
+        if (filtered.length === 0) return 0;
+        const v = Math.round(filtered.reduce((s, x) => s + x.score, 0) / filtered.length);
+        return v;
+    }, [filtered]);
 
-  const levelLabel = (level: Level) =>
-    level === 'excellent' ? '우수' : level === 'good' ? '양호' : '개선 필요';
+    const levelLabel = (level: Level) =>
+        level === 'excellent' ? '우수' : level === 'good' ? '양호' : '개선 필요';
 
-  return (
-    <div className="feedback-container">
-      <div className="feedback-card compact">
-        {/* Header */}
-        <div className="feedback-header">
-          <h2>💬 피드백</h2>
-          <button
-            type="button"
-            className="close-button"
-            aria-label="닫기"
-            onClick={() => navigate('/home', { replace: true })}
-          >
-            ×
-          </button>
-        </div>
+    return (
+        <div className="feedback-container">
+            <div className="feedback-card compact">
+                {/* Header */}
+                <div className="feedback-header">
+                    <h2>💬 피드백</h2>
+                    <button
+                        type="button"
+                        className="close-button"
+                        aria-label="닫기"
+                        onClick={() => navigate('/home', { replace: true })}
+                    >
+                        ×
+                    </button>
+                </div>
 
-        {/* [Step 1] 날짜 선택 */}
-        {!selectedDate && (
-          <>
-            <h3 className="date-section-title">
-              📅 날짜 선택
-              {availableDates.length > 0 && (
-                <button className="date-reset" onClick={resetDate}>
-                  초기화
-                </button>
-              )}
-            </h3>
+                {!userId && (
+                    <p className="empty">로그인 정보가 없습니다. userId 설정이 필요합니다.</p>
+                )}
 
-            {availableDates.length === 0 ? (
-              <p className="empty">아직 등록된 피드백 날짜가 없습니다.</p>
-            ) : (
-              <div className="date-picker" role="listbox" aria-label="피드백 날짜 목록">
-                {availableDates.map(date => (
-                  <button
-                    key={date}
-                    className={`date-card ${selectedDate === date ? 'active' : ''}`}
-                    role="option"
-                    aria-selected={selectedDate === date}
-                    onClick={() => handleSelectDate(date)}
-                  >
-                    {date}
-                  </button>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+                {error && <p className="empty">⚠ {error}</p>}
 
-        {/* [Step 2] 상세 */}
-        {selectedDate && (
-          <>
-            <h3 className="date-section-title">
-              📅 선택한 날짜: <span>{selectedDate}</span>
-              <button className="date-reset" onClick={resetDate}>
-                다른 날짜 선택
-              </button>
-            </h3>
+                {/* [Step 1] 날짜 선택 */}
+                {!selectedDate && userId && (
+                    <>
+                        <h3 className="date-section-title">
+                            📅 날짜 선택
+                            {dates.length > 0 && (
+                                <button className="date-reset" onClick={resetDate}>
+                                    초기화
+                                </button>
+                            )}
+                        </h3>
 
-            {/* Summary */}
-            <section className="summary" aria-label="요약">
-              <div className="summary-item">
-                <span className="summary-label">총 항목</span>
-                <strong className="summary-value">{filtered.length}개</strong>
-              </div>
-              <div className="summary-item">
-                <span className="summary-label">평균 점수</span>
-                <strong className="summary-value">{avgScore}</strong>
-              </div>
-            </section>
+                        {loadingDates ? (
+                            <p className="empty">로딩 중…</p>
+                        ) : dates.length === 0 ? (
+                            <p className="empty">아직 등록된 피드백 날짜가 없습니다.</p>
+                        ) : (
+                            <div className="date-picker" role="listbox" aria-label="피드백 날짜 목록">
+                                {dates.map(({ date }) => (
+                                    <button
+                                        key={date}
+                                        className={`date-card ${selectedDate === date ? 'active' : ''}`}
+                                        role="option"
+                                        aria-selected={selectedDate === date}
+                                        onClick={() => handleSelectDate(date)}
+                                    >
+                                        {date}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </>
+                )}
 
-            {/* Tabs */}
-            <nav className="tabs" aria-label="피드백 카테고리">
-              {TABS.map(tab => (
-                <button
-                  key={tab}
-                  className={`tab ${activeTab === tab ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab)}
-                >
-                  {tab === 'All' ? '전체' : tab}
-                </button>
-              ))}
-            </nav>
+                {/* [Step 2] 상세 */}
+                {selectedDate && (
+                    <>
+                        <h3 className="date-section-title">
+                            📅 선택한 날짜: <span>{selectedDate}</span>
+                            <button className="date-reset" onClick={resetDate}>
+                                다른 날짜 선택
+                            </button>
+                        </h3>
 
-            {/* List */}
-            <h3 className="section-title">사용자 피드백</h3>
-            {filtered.length === 0 ? (
-              <p className="empty">이 날짜에는 선택한 카테고리의 피드백이 없습니다.</p>
-            ) : (
-              <ul className="feedback-list" role="list">
-                {filtered.map((item, idx) => (
-                  <li key={`${item.date}-${idx}`} className="feedback-item">
-                    <div className="item-head">
-                      {/* 여러 카테고리 뱃지 (가드 포함) */}
-                      <div className="topic-badges" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        {(item.topics ?? []).map(t => (
-                          <span key={t} className={`topic-badge topic-${t.toLowerCase()}`}>
+                        <section className="summary" aria-label="요약">
+                            <div className="summary-item">
+                                <span className="summary-label">총 항목</span>
+                                <strong className="summary-value">{filtered.length}개</strong>
+                            </div>
+                            <div className="summary-item">
+                                <span className="summary-label">평균 점수</span>
+                                <strong className="summary-value">{avgScore}</strong>
+                            </div>
+                        </section>
+
+                        <nav className="tabs" aria-label="피드백 카테고리">
+                            {TABS.map(tab => (
+                                <button
+                                    key={tab}
+                                    className={`tab ${activeTab === tab ? 'active' : ''}`}
+                                    onClick={() => setActiveTab(tab)}
+                                >
+                                    {tab === 'All' ? '전체' : tab}
+                                </button>
+                            ))}
+                        </nav>
+
+                        {loadingItems ? (
+                            <p className="empty">로딩 중…</p>
+                        ) : filtered.length === 0 ? (
+                            <p className="empty">선택한 카테고리의 피드백이 없습니다.</p>
+                        ) : (
+                            <ul className="feedback-list" role="list">
+                                {filtered.map((item, idx) => (
+                                    <li key={`${item.date}-${idx}`} className="feedback-item">
+                                        <div className="item-head">
+                                            <div className="topic-badges" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                                {(item.topics ?? []).map(t => (
+                                                    <span key={t} className={`topic-badge topic-${t.toLowerCase()}`}>
                             {t}
                           </span>
-                        ))}
-                      </div>
-
-                      <span className={`level-chip level-${item.level}`}>
+                                                ))}
+                                            </div>
+                                            <span className={`level-chip level-${item.level}`}>
                         {levelLabel(item.level)}
                       </span>
-                    </div>
+                                        </div>
 
-                    <div className="score-wrap" aria-label={`점수: ${item.score}점`}>
-                      <div className="score-bar">
-                        <div className="score-fill" style={{ width: `${item.score}%` }} />
-                      </div>
-                      <span className="score-text">{item.score}</span>
-                    </div>
+                                        <div className="score-wrap" aria-label={`점수: ${item.score}점`}>
+                                            <div className="score-bar">
+                                                <div className="score-fill" style={{ width: `${item.score}%` }} />
+                                            </div>
+                                            <span className="score-text">{item.score}</span>
+                                        </div>
 
-                    <details className="feedback-details">
-                      <summary className="details-summary">세부 코멘트 보기</summary>
-                      <p className="feedback-text">{item.feedback}</p>
-                    </details>
+                                        <details className="feedback-details">
+                                            <summary className="details-summary">세부 코멘트 보기</summary>
+                                            <p className="feedback-text" style={{ whiteSpace: 'pre-wrap' }}>
+                                                {item.feedback}
+                                            </p>
+                                        </details>
 
-                    <div className="meta">
-                      <span className="date">🗓 {item.date}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
+                                        <div className="meta">
+                                            <span className="date">🗓 {item.date}</span>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </>
+                )}
+            </div>
+        </div>
+    );
 }

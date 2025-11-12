@@ -1,0 +1,278 @@
+import React, { useMemo, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import '../pages/Login.css';
+
+type AuthResponse = {
+  ok?: boolean;
+  message?: string;
+  token?: string;
+  user?: { id: number; username: string; email: string };
+};
+
+//로그인 함수
+export default function Login() {
+  const [isSignIn, setIsSignIn] = useState(true);
+  const [loginForm, setLoginForm] = useState({
+    email: '',
+    password: '',
+  });
+  const [signupForm, setSignupForm] = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>('');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  //회원가입 후 로그인 페이지로 넘어갈 때 이메일 자동 입력
+  useEffect(() => {
+    if (location.state?.email) {
+      setLoginForm((prev) => ({ ...prev, email: location.state.email }));
+      setIsSignIn(true);
+    }
+  }, [location.state]);
+
+  // ---------- Input Handlers ----------
+  const onChangeLogin = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLoginForm((f) => ({ ...f, [name]: value }));
+  };
+
+  const onChangeSignup = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setSignupForm((f) => ({ ...f, [name]: value }));
+  };
+
+  // ---------- Validation ----------
+  const emailOk = useMemo(
+      () => !signupForm.email || /\S+@\S+\.\S+/.test(signupForm.email),
+      [signupForm.email]
+  );
+
+  const pwMismatch = useMemo(
+      () =>
+          !!signupForm.password &&
+          !!signupForm.confirmPassword &&
+          signupForm.password !== signupForm.confirmPassword,
+      [signupForm.password, signupForm.confirmPassword]
+  );
+
+  const canLogin = useMemo(
+      () => !!loginForm.email.trim() && !!loginForm.password,
+      [loginForm.email, loginForm.password]
+  );
+
+  const canSignup = useMemo(
+      () =>
+          !!signupForm.username.trim() &&
+          !!signupForm.email.trim() &&
+          !!signupForm.password &&
+          !!signupForm.confirmPassword &&
+          emailOk &&
+          !pwMismatch,
+      [signupForm, emailOk, pwMismatch]
+  );
+
+  // ---------- Submit Handler ----------
+  const handleSubmit = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      if (isSignIn) {
+        if (!canLogin) return;
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: loginForm.email.trim(),
+            password: loginForm.password,
+          }),
+        });
+        if (isSignIn) {
+          if (!canLogin) return;
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: loginForm.email.trim(),
+              password: loginForm.password,
+            }),
+          });
+
+          // 1) HTTP 코드 검사
+          const data: AuthResponse = await res.json().catch(() => ({} as AuthResponse));
+          if (!res.ok) throw new Error(data?.message || '로그인 실패');
+
+          // 2) 바디 검사(필수)
+          if (!data?.token) {
+            throw new Error(data?.message || '이메일 또는 비밀번호가 올바르지 않습니다.');
+          }
+
+          // 3) 성공 분기에서만 저장+이동
+          localStorage.setItem('token', data.token);
+          navigate('/home', { replace: true }); // 뒤로가기로 재진입 방지
+        }
+
+      } else {
+        if (!canSignup) return;
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: signupForm.username.trim(),
+            email: signupForm.email.trim(),
+            password: signupForm.password,
+            confirmPassword: signupForm.confirmPassword,
+          }),
+        });
+        const data: AuthResponse = await res.json();
+        if (!res.ok) throw new Error(data?.message || '회원가입 실패');
+        // 회원가입 성공 시 로그인 페이지로 이동 + 이메일 전달
+        navigate('/login', { state: { email: signupForm.email.trim() } });
+      }
+    } catch (e: any) {
+      setError(e?.message || '오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //엔터 키로 제출
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' && !loading) {
+      if (isSignIn && canLogin) handleSubmit();
+      else if (!isSignIn && canSignup) handleSubmit();
+    }
+  };
+
+  // ---------- Render ----------
+  return (
+      <div
+          className={`container ${isSignIn ? 'sign-in' : 'sign-up'}`}
+          onKeyDown={handleKeyDown}
+      >
+        <div className="row">
+          {/*회원가입 페이지*/}
+          <div className="col align-items-center flex-col sign-up">
+            <div className="form-wrapper align-items-center">
+              <div className="form sign-up">
+                <div className="input-group">
+                  <input
+                      name="username"
+                      type="text"
+                      placeholder="Username"
+                      value={signupForm.username}
+                      onChange={onChangeSignup}
+                  />
+                </div>
+                <div className="input-group">
+                  <input
+                      name="email"
+                      type="email"
+                      placeholder="Email"
+                      value={signupForm.email}
+                      onChange={onChangeSignup}
+                  />
+                </div>
+                {!emailOk && <p className="error">이메일 형식이 올바르지 않습니다.</p>}
+
+                <div className="input-group">
+                  <input
+                      name="password"
+                      type="password"
+                      placeholder="Password"
+                      value={signupForm.password}
+                      onChange={onChangeSignup}
+                  />
+                </div>
+                <div className="input-group">
+                  <input
+                      name="confirmPassword"
+                      type="password"
+                      placeholder="Confirm password"
+                      value={signupForm.confirmPassword}
+                      onChange={onChangeSignup}
+                  />
+                </div>
+                {pwMismatch && <p className="error">비밀번호가 일치하지 않습니다.</p>}
+                {!pwMismatch && !isSignIn && error && <p className="error">{error}</p>}
+
+                <button
+                    className={`btn ${!canSignup ? 'btn-disabled' : ''}`}
+                    onClick={handleSubmit}
+                    disabled={!canSignup || loading}
+                >
+                  {loading ? 'Signing up…' : 'Sign up'}
+                </button>
+
+                <p>
+                  <span>Already have an account?</span>{' '}
+                  <b
+                      onClick={() => {
+                        setError('');
+                        setIsSignIn(true);
+                      }}
+                      className="pointer"
+                  >
+                    Sign in here
+                  </b>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* 로그인 페이지*/}
+          <div className="col align-items-center flex-col sign-in">
+            <div className="form-wrapper align-items-center">
+              <div className="form sign-in">
+                <div className="input-group">
+                  <input
+                      name="email"
+                      type="email"
+                      placeholder="Email"
+                      value={loginForm.email}
+                      onChange={onChangeLogin}
+                      autoComplete="email"
+                  />
+                </div>
+                <div className="input-group">
+                  <input
+                      name="password"
+                      type="password"
+                      placeholder="Password"
+                      value={loginForm.password}
+                      onChange={onChangeLogin}
+                  />
+                </div>
+                {isSignIn && error && <p className="error">{error}</p>}
+
+                <button
+                    className={`btn ${!canLogin ? 'btn-disabled' : ''}`}
+                    onClick={handleSubmit}
+                    disabled={!canLogin || loading}
+                >
+                  {loading ? 'Signing in…' : 'Sign in'}
+                </button>
+
+                <p>
+                  <span>Don't have an account?</span>{' '}
+                  <b
+                      onClick={() => {
+                        setError('');
+                        setIsSignIn(false);
+                      }}
+                      className="pointer"
+                  >
+                    Sign up here
+                  </b>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  );
+}

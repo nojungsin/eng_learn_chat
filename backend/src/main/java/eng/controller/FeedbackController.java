@@ -43,4 +43,3 @@ public class FeedbackController {
         return ResponseEntity.ok(feedbackService.listDetailsByReport(userId, reportId));
     }
 }
-

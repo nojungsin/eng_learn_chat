@@ -1,6 +1,8 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import text, voice, testgen
+from .routers.text import router as textr
+from .routers.voice import router as voicer
 
 app = FastAPI()
 
@@ -13,10 +15,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/static/recordings", StaticFiles(directory="app/storage/recordings"), name="recordings")
+app.mount("/static/tts", StaticFiles(directory="app/storage/tts"), name="tts")
+
 # 라우터 등록
-app.include_router(text.router, prefix="/api/text",tags=["text"])
-#app.include_router(voice.router, prefix="/voice", tags=["voice"])
-#app.include_router(testgen.router, prefix="/test", tags=["test"])
+app.include_router(textr, prefix="/api/text",tags=["text"])
+app.include_router(voicer, prefix="/api/voice", tags=["voice"])
+#app.include_router(testgen, prefix="/test", tags=["test"])
 
 @app.get("/")
 def home():

@@ -21,10 +21,10 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
-    // ✅ 선택: JSON 처리에 유용 (필요시)
+    // 선택: JSON 처리에 유용 (필요시)
     implementation("com.fasterxml.jackson.core:jackson-databind")
 
-    // ✅ 선택: 로깅 (이미 포함되지만 명시적 사용 가능)
+    // 선택: 로깅 (이미 포함되지만 명시적 사용 가능)
     implementation("org.springframework.boot:spring-boot-starter-logging")
 
     implementation("org.springframework.boot:spring-boot-starter-webflux")

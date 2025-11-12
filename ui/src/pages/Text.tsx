@@ -70,7 +70,7 @@ export default function Chat() {
     const [sessionId, setSessionId] = useState('');
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
-    const [pendingVoca, setPendingVoca] = useState<VocaItem[]>([]);  // ✅ 이동: 컴포넌트 내부
+    const [pendingVoca, setPendingVoca] = useState<VocaItem[]>([]);  // 이동: 컴포넌트 내부
     const navigate = useNavigate();
     const currentUserId = Number(localStorage.getItem('userId') ?? '0');
 
@@ -239,51 +239,100 @@ export default function Chat() {
         if (e.key === 'Enter') { e.preventDefault(); handleSend(); }
     };
 
-    const handleExit = async () => {
+    //종료 버튼 핸들러(피드백 보고서 저장 + 채팅 기록 기반 피드백 디테일 저장+feedback.tsx 페이지로 넘어가기)
+    // Text.tsx 내부
+    const handleExit = async (): Promise<void> => {
         const { lastUser, lastAi } = getLastTurn();
-        if (!currentUserId) { alert('로그인 정보가 없습니다.'); navigate(-1); return; }
         if (!lastUser || !lastAi) { alert('저장할 피드백이 없습니다.'); navigate(-1); return; }
 
+        // 공통 헤더 생성 (TS 안전)
+        const buildHeaders = (): Headers => {
+            const h = new Headers();
+            h.append('Content-Type', 'application/json');
+            const token = localStorage.getItem('token'); // ← 프로젝트 키와 동일하게 유지
+            if (token) h.append('Authorization', `Bearer ${token}`);
+            return h;
+        };
+
         try {
+            // 1) 단어장 벌크 저장 (있을 때만)
             if (pendingVoca.length) {
-                const body = { items: pendingVoca.map(v => ({
-                        word: v.word, meaningKo: v.meaningKo ?? null, example: v.example ?? null, known: false
-                    }))};
+                const body = {
+                    items: pendingVoca.map(v => ({
+                        word: v.word,
+                        meaningKo: v.meaningKo ?? null,
+                        example: v.example ?? null,
+                        known: false,
+                    })),
+                };
+
                 await fetch('/api/voca/bulk', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
-                }).catch(() => {});
+                    method: 'POST',
+                    headers: buildHeaders(),
+                    // 쿠키 세션이라면 필요:
+                    // credentials: 'include',
+                    body: JSON.stringify(body),
+                }).catch(() => { /* 실패해도 진행 */ });
+
                 setPendingVoca([]); // 중복 방지
             }
 
+            // 2) 피드백 리포트 finalize
+            const payloadBody = {
+                sessionId: sessionId || selectedTopic || 'text-session',
+                // 백엔드 enum이 대문자라면 아래처럼 보정:
+                topic: (selectedTopic ?? 'GENERAL'),
+            };
+
             const res = await fetch('/api/feedback/finalize', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId: sessionId || selectedTopic || 'text-session', topic: selectedTopic || 'General' }),
+                headers: buildHeaders(),
+                // 쿠키 세션이라면 필요:
+                // credentials: 'include',
+                body: JSON.stringify(payloadBody),
             });
 
             const today = new Date().toISOString().slice(0, 10);
+
             if (res.status === 204) {
                 alert('이번 대화에 저장할 피드백이 없어 리포트는 생성되지 않았어요.');
                 navigate(`/feedback?date=${today}`, { replace: true });
                 return;
             }
+
+            if (res.status === 401 || res.status === 403) {
+                alert('로그인이 필요합니다. 다시 로그인해 주세요.');
+                navigate('/login');
+                return;
+            }
+
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-            let payload: any = null;
+            // 서버가 { reportId } 또는 숫자만 반환하는 두 케이스 커버
+            let payload: unknown = null;
             try { payload = await res.json(); } catch {}
-            const reportId: number | undefined =
-                typeof payload?.reportId === 'number' ? payload.reportId : (payload && Number(payload)) || undefined;
+
+            let reportId: number | undefined = undefined;
+            if (payload && typeof payload === 'object' && 'reportId' in (payload as any)) {
+                const v = (payload as any).reportId;
+                if (typeof v === 'number') reportId = v;
+            } else if (typeof payload === 'number') {
+                reportId = payload;
+            }
 
             navigate(`/feedback?date=${today}`, {
                 replace: true,
                 state: reportId ? { highlightReportId: reportId } : undefined,
             });
+
         } catch (e) {
             console.error(e);
             alert('피드백 저장 중 오류가 발생했습니다.');
-            navigate(-1);
+            navigate('/feedback');
         }
     };
+
+
 
     const topics = [
         { emoji: '🏥', label: '병원', t: 'Visiting a doctor at the hospital' },

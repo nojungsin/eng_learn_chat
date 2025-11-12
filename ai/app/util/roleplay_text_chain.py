@@ -1,5 +1,20 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
+def create_initial_prompt(topic: str, ai_role: str, user_role: str):
+    # 초기 인사는 영어 1~2문장만, 메타 질문 금지, [Feedback] 금지
+    return f"""
+You are {ai_role}. The user is {user_role}. Topic: "{topic}".
+
+Begin the role-play immediately in ENGLISH.
+
+STRICT REQUIREMENTS:
+- Do NOT ask whether to start, or what your role/topic is.
+- Do NOT mention instructions, prompts, roles, or the word "start".
+- Do NOT include any [Feedback] section on this first turn.
+- Output ONLY this single line:
+
+[AI Reply]: <1–2 natural sentences to open the conversation in your role, ending with a topical question>
+""".strip()
 
 def create_roleplay_chain():
     """
@@ -21,6 +36,11 @@ You are participating in an English role-play conversation.
 - Your role: {ai_role}
 - User's role: {user_role}
 - Objective: Practice natural English conversation.
+
+CRITICAL BEHAVIOR RULES:
+- Do NOT ask meta-questions like "Should we start?", "What is my role?", or "What is the topic?".
+- Assume the given topic and roles are final and already agreed.
+- Stay strictly in character and proceed with the conversation.
 
 User just said: "{user_message}"
 
@@ -62,12 +82,3 @@ Now produce the output in the exact format.
 
     model = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
     return prompt | model
-
-
-def create_initial_prompt(topic: str, ai_role: str, user_role: str):
-    # 초기 인사는 기존과 동일
-    return f"""
-You are {ai_role}, and the user is {user_role}.
-Start a natural conversation about {topic}.
-Say a short greeting first.
-"""

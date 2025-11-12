@@ -1,7 +1,7 @@
 # app/services/text_chat.py (예시 파일명)
 
 from ..services.llm_client import get_model
-from app.util.roleplay_chain import create_initial_prompt, create_roleplay_chain
+from app.util.roleplay_text_chain import create_initial_prompt, create_roleplay_chain
 import re
 from typing import Dict, List
 

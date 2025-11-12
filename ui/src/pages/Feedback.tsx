@@ -1,14 +1,15 @@
 // src/pages/Feedback.tsx
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { fetchWithAuth } from "../lib/api";
 import './Feedback.css';
 
 /** ==== Types ==== */
-type Topic = 'Grammar' | 'Vocabulary' | 'Conversation';
+type Category = 'Grammar' | 'Vocabulary' | 'Conversation';
 type Level = 'excellent' | 'good' | 'needs-work';
 
 type FeedbackItem = {
-    topics: Topic[];
+    categories: Category[];
     feedback: string;
     score: number;
     level: Level;
@@ -18,24 +19,25 @@ type FeedbackItem = {
 type ReportDate = { reportId: number; date: string };
 
 /** ==== API ==== */
+/*선택 가능한 보고서 목록 불러오기*/
 async function fetchReportDates(userId: number): Promise<ReportDate[]> {
-    const res = await fetch(`/api/feedback/report-dates?userId=${userId}`);
+    const res = await fetchWithAuth(`/api/feedback/report-dates`)
     if (!res.ok) throw new Error('failed to load report dates');
     return res.json();
 }
 
+/*보고서 목록에서 선택한 보고서의 세부 details들 불러오기*/
 async function fetchDetails(userId: number, reportId: number): Promise<FeedbackItem[]> {
-    const res = await fetch(`/api/feedback/reports/${reportId}/details?userId=${userId}`);
+    const res = await fetchWithAuth(`/api/feedback/reports/${reportId}/details`);
     if (!res.ok) throw new Error('failed to load details');
-    // 서버에서 이미 형식 맞춰서 내려오므로 그대로 사용
     const data = (await res.json()) as FeedbackItem[];
     // 토픽/레벨 가드 (혹시 서버가 빈 토픽 보낼 때 대비)
-    const asTopic = (v: string): Topic | null =>
+    const asTopic = (v: string): Category | null =>
         v === 'Grammar' || v === 'Vocabulary' || v === 'Conversation' ? v : null;
 
     return data.map(d => ({
-        topics: Array.isArray(d.topics)
-            ? (d.topics.map(String).map(s => s.trim()).map(asTopic).filter(Boolean) as Topic[])
+        categories: Array.isArray(d.categories)
+            ? (d.categories.map(String).map(s => s.trim()).map(asTopic).filter(Boolean) as Category[])
             : ['Grammar'],
         feedback: String(d.feedback ?? ''),
         score: Number.isFinite(d.score as number) ? (d.score as number) : 0,
@@ -48,7 +50,7 @@ async function fetchDetails(userId: number, reportId: number): Promise<FeedbackI
 }
 
 /** ==== 유틸 ==== */
-const TABS: Array<'All' | Topic> = ['All', 'Grammar', 'Vocabulary', 'Conversation'];
+const TABS: Array<'All' | Category> = ['All', 'Grammar', 'Vocabulary', 'Conversation'];
 
 /** ==== 실제 페이지 ==== */
 export default function Feedback() {
@@ -72,7 +74,7 @@ export default function Feedback() {
     const initialDateFromUrl = searchParams.get('date');
     const [selectedDate, setSelectedDate] = useState<string | null>(initialDateFromUrl);
 
-    const [activeTab, setActiveTab] = useState<'All' | Topic>('All');
+    const [activeTab, setActiveTab] = useState<'All' | Category>('All');
     const [items, setItems] = useState<FeedbackItem[]>([]);
     const [loadingItems, setLoadingItems] = useState(false);
 
@@ -136,6 +138,7 @@ export default function Feedback() {
         setSearchParams({ date }); // 주소창 반영
     };
 
+    //다시 feedbackreport 목록 불러오기
     const resetDate = () => {
         setSelectedDate(null);
         searchParams.delete('date');
@@ -148,7 +151,7 @@ export default function Feedback() {
         () =>
             activeTab === 'All'
                 ? items
-                : items.filter(f => (f.topics ?? []).includes(activeTab)),
+                : items.filter(f => (f.categories ?? []).includes(activeTab)),
         [activeTab, items]
     );
 
@@ -260,7 +263,7 @@ export default function Feedback() {
                                     <li key={`${item.date}-${idx}`} className="feedback-item">
                                         <div className="item-head">
                                             <div className="topic-badges" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                                                {(item.topics ?? []).map(t => (
+                                                {(item.categories ?? []).map(t => (
                                                     <span key={t} className={`topic-badge topic-${t.toLowerCase()}`}>
                             {t}
                           </span>

@@ -1,10 +1,14 @@
-#프로젝트 테스트 할때 실행 방법
+# AI 활용 영어 학습 채팅
+ 
+ AI 활용 영어 학습 채팅은 사용자가 AI와의 대화를 통해 영어 사용 능력을 향상하도록 지원한다. 사용자는 AI와의 대화를 통해 영어를 자연스럽게 연습하고, 시스템이 제공하는 피드백 보고서와 테스트를 통해 학습 성취를 높일 수 있다.
 
-1. ai 디렉토리에서 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 실행
-2. back 디렉토리에서 ./gradlew bootrun실행
-3. ui 디렉토리에서 npm start 실행 
-(db 세팅 등과 관련해서 .env파일 필요. 해당 파일은 깃허브에 업로드 x, .env파일에 업데이트 있을 경우 개별적으로 공유)
+## 참여자
+ 팀장 : 윤혜준
+ 팀원 : 변재윤
 
-#프로젝트 시연할 때 docker-compose로 back,ui동시에 실행(시간 오래 걸림. 프로젝트 테스트 할 때는 비추)
+ ## 사용된 공개 S/W
 
-루트 디렉토리에서 docker-compose up --build
+ Spring Boot, React, PostgreSQL, Gradle, FastApi, Gemini API, Wav2vec 2.0, Librosa, PyTorch, Nginx, Docker
+
+ ## 기대 효과
+  학습자가 언제 어디서나 영어를 연습할 수 있는 환경을 제공하여 접근성과 지속성을 높이고, 개인 맞춤형 피드백고 성취 분석을 통해 효과적인 학습을 지원한다. 또한 실정 회화 능력 향상에 기여한다. 장기적으로는 영어를 넘어 다양한 언어 학습 시스템으로의 확장이 가능하다.

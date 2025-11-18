@@ -1,0 +1,28 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gemini-chat
+
+  jackson:
+    serialization:
+      indent-output: true   # (Boot 권장 키: indent-output)
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/myappdb
+    username: appuser
+    password: app_pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# 앱 커스텀 설정(원래 git:jwt 였던 것)
+jwt:
+  secret: ${JWT_SECRET}

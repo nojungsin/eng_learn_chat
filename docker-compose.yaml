@@ -1,0 +1,30 @@
+version: '3.9'
+
+name: english-learning
+
+networks:
+  english-learning:
+    external: true
+
+volumes:
+  postgres-data:
+
+x-networks: &networks
+  english-learning:
+
+services:
+  postgresql:
+    image: postgres:17
+    container_name: english-learning-postgresql
+    command: -c shared_buffers=128MB
+    environment:
+      - TZ=Asia/Seoul
+      - POSTGRES_INITDB_ARGS=-k -E UTF8
+      - POSTGRES_DB=myappdb
+      - POSTGRES_USER=appuser
+      - POSTGRES_PASSWORD=app_pass
+    networks: *networks
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data

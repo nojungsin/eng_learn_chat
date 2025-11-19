@@ -12,6 +12,10 @@
 
  Spring Boot, React, PostgreSQL, Gradle, FastApi, Gemini API, Wav2vec 2.0, Librosa, PyTorch, Nginx, Docker
 
+ ### 📌 AI 파인튜닝 사용 데이터
+ LibriSpeech의 train-clean-100
+ 데이터 다운로드 url : https://www.openslr.org/12
+
 
 ## 🖇 작품의 주요 기능
 1. 텍스트 채팅 : 사용자는 AI와 텍스트 형식으로 영어 대화를 주고받으면서 문법, 어휘 부분에서의 즉각적인 피드백을 받을 수 있다.

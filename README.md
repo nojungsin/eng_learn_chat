@@ -18,7 +18,7 @@
  
  데이터 다운로드 url : https://www.openslr.org/12
 
- ### 📌 파인튜닝 발음 분석 AI
+ ### 📌 발음 분석 AI
  https://drive.google.com/drive/folders/15xbHrsYQncODxVv85QZcOATf_8kk5Kv1?usp=drive_link
 
 

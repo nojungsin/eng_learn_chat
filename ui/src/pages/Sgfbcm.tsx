@@ -1,8 +1,8 @@
-// src/pages/Feedback.tsx
+// src/pages/Sgfbcm.tsx
 import { useMemo, useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchWithAuth } from "../lib/api";
-import './Feedback.css';
+import './Sgfbcm.css';
 
 /** ==== Types ==== */
 type Category = 'Grammar' | 'Vocabulary' | 'Conversation';
@@ -53,7 +53,7 @@ async function fetchDetails(userId: number, reportId: number): Promise<FeedbackI
 const TABS: Array<'All' | Category> = ['All', 'Grammar', 'Vocabulary', 'Conversation'];
 
 /** ==== 실제 페이지 ==== */
-export default function Feedback() {
+export default function Sgfbcm() {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
 

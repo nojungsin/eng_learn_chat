@@ -9,6 +9,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class ReportSummaryDto {
     private Long reportId;
+    private Long user;
     private String date;          // yyyy-MM-dd
     private String topic;         // nullable
     private Double avgGrammar;    // nullable

@@ -16,7 +16,6 @@ type MeResponse =
     // 흔한 형태 2 (토큰만 다시 내려주는 타입)
     success?: boolean;
     message?: string;
-    accessToken?: string;
     accesstoken?: string;
     token?: string;
 }
@@ -151,13 +150,13 @@ export default function Mypage() {
                     className="menu-item"
                     role="menuitem"
                     tabIndex={0}
-                    onClick={go('/feedback')}
-                    onKeyDown={onKeyActivate('/feedback')}
+                    onClick={go('/achievement')}
+                    onKeyDown={onKeyActivate('/achievement')}
                 >
                     <span className="menu-icon">📋</span>
                     <div className="menu-texts">
                         <span className="menu-text">학습 지표</span>
-                        <span className="menu-sub">나의 피드백/점수 모아보기</span>
+                        <span className="menu-sub">나의 학습 성취도 보기</span>
                     </div>
                     <span className="menu-chevron" aria-hidden>
             ›
@@ -185,8 +184,8 @@ export default function Mypage() {
                     className="menu-item"
                     role="menuitem"
                     tabIndex={0}
-                    onClick={go('/feedback')}
-                    onKeyDown={onKeyActivate('/feedback')}
+                    onClick={go('/sgfbcm')}
+                    onKeyDown={onKeyActivate('/sgfbcm')}
                 >
                     <span className="menu-icon">📝</span>
                     <div className="menu-texts">

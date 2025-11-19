@@ -5,9 +5,11 @@ import Home from './pages/Home';
 import Feedback from './pages/Feedback';
 import Vocab from './pages/Vocab';
 import Service from './pages/Service';
+import Sgfbcm from './pages/Sgfbcm';
 import Chat from './pages/Chat';
 import Test from './pages/Test';
 import PersonalData from './pages/PersonalData';
+import Achievement from './pages/Achievement';
 import Announcements from './pages/Announcements';
 import Report from './pages/Report';
 import Mypage from './pages/Mypage';
@@ -35,7 +37,9 @@ function App() {
                 <Route path="/vocab" element={<Vocab />} />
                 <Route path="/test" element={<Test />} />
                 <Route path="/chat" element={<Chat />} />
+                <Route path="/achievement" element={<Achievement />} />
                 <Route path="/announcements" element={<Announcements />} />
+                <Route path="/sgfbcm" element={<Sgfbcm />} />
                 <Route path="/service" element={<Service />} />
                 <Route path="/mypage" element={<Mypage />} />{/*mypage 라우트 설정 */}
                 <Route path="/report" element={<Report />} />

@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +29,7 @@ public class FeedbackService {
         return reports.stream()
                 .map(r -> new ReportSummaryDto(
                         r.getReportId(),
+                        r.getUserId(),
                         r.getDate() != null ? r.getDate().format(DTF) : null,
                         r.getTopic(),
                         r.getAvgGrammar(),

@@ -1,6 +1,6 @@
 #프로젝트 테스트 할때 실행 방법
 
-1. ai 디렉토리에서 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 실행
+1. ai 디렉토리에서 .\.venv\Scripts\activate 명령어로 가상환경 세팅해놓은 거 실행 후 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 실행
 2. back 디렉토리에서 ./gradlew bootrun실행
 3. ui 디렉토리에서 npm start 실행 
 (db 세팅 등과 관련해서 .env파일 필요. 해당 파일은 깃허브에 업로드 x, .env파일에 업데이트 있을 경우 개별적으로 공유)

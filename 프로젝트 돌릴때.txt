@@ -1,0 +1,11 @@
+#프로젝트 테스트 할때 실행 방법
+
+1. docker-compose 켜놓은 상태에서 프로젝트 실행(spring boot server+db 실행)
+2. ai 디렉토리에서 .\.venv\Scripts\activate 명령어로 python 가상환경 세팅해놓은 거 실행 후 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 실행(gemini api+wav2vec 파인튜닝해서 만든 발음 분석 ai 실행)
+3. ui 디렉토리에서 npm start 실행 
+
+(db 세팅 등과 관련해서 .env파일 필요. 해당 파일은 깃허브에 업로드 x, .env파일에 업데이트 있을 경우 개별적으로 공유)
+(발음 분석 ai 용량 문제로 깃 업로드x. 해당 파일 개별적으로 공유)
+
+#프로젝트 시연할 때 docker-compose build로 back,ui동시에 실행(시간 오래 걸림. 프로젝트 테스트 할 때는 비추)
+#루트 디렉토리에서 docker-compose up --build
